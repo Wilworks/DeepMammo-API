@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Tutorial — DeepMammo{% endblock %}
+
+{% block extra_css %}
+<style>
+.tutorial { max-width: 760px; margin: 0 auto; padding: 3rem 2rem; }
+.tutorial h1 { font-size: 1.7rem; font-weight: 700; margin-bottom: 0.25rem; }
+.tutorial .sub { color: var(--text-light); font-size: 0.9rem; margin-bottom: 2.5rem; }
+.step-card { display: flex; gap: 1.25rem; margin-bottom: 1.5rem; }
+.step-card .step-num {
+  width: 40px; height: 40px; min-width: 40px;
+  background: var(--purple); color: white;
+  border-radius: 50%; font-weight: 700; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-card .step-body h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
+.step-card .step-body p  { font-size: 0.88rem; color: var(--text-mid); line-height: 1.65; }
+.tip-box {
+  background: var(--purple-light);
+  border-left: 3px solid var(--purple);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.25rem;
+  font-size: 0.88rem;
+  color: var(--text-dark);
+  margin-top: 2rem;
+}
+.tip-box strong { color: var(--purple); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tutorial">
+  <h1>How to Use DeepMammo</h1>
+  <p class="sub">A step-by-step guide to making predictions</p>
+
+  <div class="step-card">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>Prepare your image</h3>
+      <p>Use a standard mammogram in PNG or JPG format. The image should be a full mammogram view (CC or MLO). Maximum file size is 20 MB. DICOM files should be exported to PNG before uploading.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>Upload on the Dashboard</h3>
+      <p>Navigate to the <a href="/dashboard">Dashboard</a> page. Click the upload area or drag and drop your image directly. The filename will appear once selected.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Run the analysis</h3>
+      <p>Click <strong>Run Analysis</strong>. The system will preprocess your image (CLAHE enhancement, breast tissue isolation), run it through the EfficientNet-B4 model, and generate segmentation and classification outputs. This takes 5 – 15 seconds.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h3>Review the results</h3>
+      <p>You will see: <strong>Abnormality type</strong> (mass or calcification), <strong>Pathology</strong> (benign or malignant), a <strong>segmentation mask</strong> showing the detected region, a <strong>saliency map</strong> highlighting model attention, and a structured <strong>clinical report</strong>.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <h3>Download the PDF report</h3>
+      <p>Click <strong>Download PDF</strong> to save a formatted report containing all predictions, visual outputs, and the AI-generated clinical narrative. Share with your clinical team for review.</p>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <strong>Important:</strong> DeepMammo is an AI-assisted research tool.
+    All results must be reviewed and verified by a qualified radiologist before
+    any clinical decision is made. This tool does not replace professional medical diagnosis.
+  </div>
+</div>
+{% endblock %}

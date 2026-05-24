@@ -1,0 +1,442 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard — DeepMammo{% endblock %}
+
+{% block extra_css %}
+<style>
+.dashboard { max-width: 980px; margin: 0 auto; padding: 2.5rem 2rem; }
+.dashboard h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.2rem; }
+.dashboard .sub { color: var(--text-light); font-size: 0.88rem; margin-bottom: 2rem; }
+
+/* Results grid */
+.results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+@media(max-width:640px){ .results-grid{ grid-template-columns:1fr; } }
+.result-block h3 { font-size:0.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--text-light); margin-bottom:.75rem; }
+.prediction-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem; }
+.prediction-row .label { font-size:.87rem; color:var(--text-mid); }
+
+/* Loading */
+.loading-state { text-align:center; padding:3rem; }
+.loading-state p { margin-top:1rem; color:var(--text-mid); font-size:.9rem; }
+.loading-steps { display:flex; justify-content:center; gap:1.5rem; margin-top:1rem; flex-wrap:wrap; }
+.loading-step { display:flex; align-items:center; gap:.4rem; font-size:.78rem; color:var(--text-light); }
+.loading-step.active { color:var(--purple); font-weight:600; }
+.dot { width:6px; height:6px; border-radius:50%; background:var(--border); }
+.dot.active { background:var(--purple); }
+
+/* Download bar */
+.download-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--purple-light); border:1px solid var(--border);
+  border-radius:var(--radius); padding:1rem 1.25rem; margin-top:1.25rem;
+}
+.download-bar p { font-size:.87rem; color:var(--text-mid); margin-top:2px; }
+
+/* Error */
+.error-box {
+  background:#fce4ec; border:1px solid #f48fb1;
+  border-radius:var(--radius); padding:1rem 1.25rem;
+  color:#c62828; font-size:.88rem; margin-bottom:1rem;
+}
+
+/* ── Patient modal ─────────────────────────────────────────────── */
+.modal-overlay {
+  position:fixed; inset:0;
+  background:rgba(26,26,46,0.55);
+  backdrop-filter:blur(3px);
+  z-index:200;
+  display:flex; align-items:center; justify-content:center;
+  padding:1rem;
+}
+.modal {
+  background:var(--white); border-radius:12px;
+  box-shadow:0 8px 40px rgba(83,74,183,0.18);
+  width:100%; max-width:480px;
+  padding:2rem;
+}
+.modal h2 { font-size:1.15rem; font-weight:700; color:var(--text-dark); margin-bottom:.3rem; }
+.modal .modal-sub { font-size:.83rem; color:var(--text-light); margin-bottom:1.5rem; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:.75rem; }
+.form-group { display:flex; flex-direction:column; gap:.3rem; }
+.form-group label { font-size:.78rem; font-weight:600; color:var(--text-mid); text-transform:uppercase; letter-spacing:.04em; }
+.form-group input,
+.form-group textarea {
+  border:1px solid var(--border); border-radius:8px;
+  padding:.55rem .75rem; font-size:.88rem; color:var(--text-dark);
+  background:var(--bg); outline:none; transition:border-color .2s;
+  font-family:inherit;
+}
+.form-group input:focus,
+.form-group textarea:focus { border-color:var(--purple); background:var(--white); }
+.form-group textarea { resize:vertical; min-height:60px; }
+.modal-actions { display:flex; gap:.75rem; justify-content:flex-end; margin-top:1.25rem; }
+.modal-note { font-size:.75rem; color:var(--text-light); margin-top:1rem; font-style:italic; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+  <h1>Dashboard</h1>
+  <p class="sub">Upload a mammogram image to run a full AI analysis.</p>
+
+  <!-- Upload panel -->
+  <div class="card">
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="imageInput" accept="image/png,image/jpeg">
+      <div class="upload-icon">&#128247;</div>
+      <p><strong>Click to upload</strong> or drag and drop</p>
+      <p style="font-size:.8rem;margin-top:4px;">PNG or JPG &mdash; max 20 MB</p>
+      <div class="file-name hidden" id="fileName"></div>
+    </div>
+    <div style="margin-top:1.25rem;display:flex;gap:1rem;align-items:center;">
+      <button class="btn btn-primary" id="predictBtn" disabled>&#9654;&nbsp;Run Analysis</button>
+      <button class="btn btn-outline hidden" id="resetBtn">&#8635;&nbsp;Reset</button>
+    </div>
+  </div>
+
+  <div class="error-box hidden" id="errorBox"></div>
+
+  <!-- Loading -->
+  <div class="card loading-state hidden" id="loadingState">
+    <div class="spinner"></div>
+    <p>Running DeepMammo analysis&hellip;</p>
+    <div class="loading-steps">
+      <div class="loading-step" id="step1"><div class="dot"></div>Preprocessing</div>
+      <div class="loading-step" id="step2"><div class="dot"></div>Inference</div>
+      <div class="loading-step" id="step3"><div class="dot"></div>GradCAM</div>
+      <div class="loading-step" id="step4"><div class="dot"></div>Clinical report</div>
+      <div class="loading-step" id="step5"><div class="dot"></div>Building PDF</div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="resultsSection" class="hidden">
+
+    <div class="results-grid mt-3">
+      <!-- Abnormality -->
+      <div class="card result-block">
+        <h3>Abnormality Type</h3>
+        <div class="prediction-row">
+          <span class="label">Prediction</span>
+          <span class="badge" id="abnLabel"></span>
+        </div>
+        <div class="prediction-row">
+          <span class="label">Confidence</span>
+          <span class="fw-bold text-purple" id="abnConf"></span>
+        </div>
+        <div class="confidence-bar-wrap">
+          <div class="confidence-bar-track">
+            <div class="confidence-bar-fill" id="abnBar" style="width:0%"></div>
+          </div>
+        </div>
+        <div style="margin-top:.75rem;font-size:.79rem;color:var(--text-light);">
+          Mass: <span id="probMass"></span> &nbsp;|&nbsp; Calcification: <span id="probCalc"></span>
+        </div>
+      </div>
+
+      <!-- Pathology -->
+      <div class="card result-block">
+        <h3>Pathology</h3>
+        <div class="prediction-row">
+          <span class="label">Prediction</span>
+          <span class="badge" id="pathLabel"></span>
+        </div>
+        <div class="prediction-row">
+          <span class="label">Confidence</span>
+          <span class="fw-bold text-purple" id="pathConf"></span>
+        </div>
+        <div class="confidence-bar-wrap">
+          <div class="confidence-bar-track">
+            <div class="confidence-bar-fill" id="pathBar" style="width:0%"></div>
+          </div>
+        </div>
+        <div style="margin-top:.75rem;font-size:.79rem;color:var(--text-light);">
+          Benign: <span id="probBenign"></span> &nbsp;|&nbsp; Malignant: <span id="probMalignant"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Images -->
+    <div class="card mt-2">
+      <h3 class="section-label">Visual Analysis</h3>
+      <div class="image-grid">
+        <div class="image-card"><img id="imgMask"    src="" alt="Segmentation Mask"><div class="image-label">Segmentation Mask</div></div>
+        <div class="image-card"><img id="imgOverlay" src="" alt="Mask Overlay">    <div class="image-label">Mask Overlay</div></div>
+        <div class="image-card"><img id="imgGradcam" src="" alt="Saliency Map">    <div class="image-label">Saliency Map</div></div>
+      </div>
+      <div style="margin-top:.75rem;font-size:.82rem;color:var(--text-light);">
+        Region coverage: <strong id="coverage"></strong> of image area
+      </div>
+    </div>
+
+    <!-- Clinical report -->
+    <div class="card mt-2">
+      <h3 class="section-label">Clinical Report</h3>
+      <div id="reportSections"></div>
+      <p style="font-size:.76rem;color:var(--text-light);margin-top:1rem;font-style:italic;">
+        Generated by <span id="reportModel"></span>
+      </p>
+    </div>
+
+    <!-- Download bar -->
+    <div class="download-bar">
+      <div>
+        <strong>Full Report Ready</strong>
+        <p>Download PDF with personalised patient details, predictions, visuals and clinical narrative.</p>
+      </div>
+      <button class="btn btn-primary" id="downloadBtn">&#8595;&nbsp;Download PDF</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Patient info modal ──────────────────────────────────────────── -->
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal">
+    <h2>Personalise Report</h2>
+    <p class="modal-sub">These details will appear in the clinical report and PDF. All fields are optional.</p>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Patient Name</label>
+        <input type="text" id="patientName" placeholder="e.g. Jane Doe">
+      </div>
+      <div class="form-group">
+        <label>Patient ID</label>
+        <input type="text" id="patientId" placeholder="e.g. PT-00123">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Referring Physician</label>
+        <input type="text" id="referringPhysician" placeholder="e.g. Dr. Mensah">
+      </div>
+      <div class="form-group">
+        <label>Examination Date</label>
+        <input type="date" id="examDate">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Clinical Notes <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+      <textarea id="clinicalNotes" placeholder="e.g. Screening mammogram, no prior history"></textarea>
+    </div>
+
+    <p class="modal-note">You may skip this and click "Skip &amp; Download" to generate a report without patient details.</p>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="skipBtn">Skip &amp; Download</button>
+      <button class="btn btn-primary" id="confirmBtn">Generate &amp; Download</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const uploadZone = document.getElementById('uploadZone');
+const imageInput = document.getElementById('imageInput');
+const predictBtn = document.getElementById('predictBtn');
+const resetBtn   = document.getElementById('resetBtn');
+const fileNameEl = document.getElementById('fileName');
+const loadingEl  = document.getElementById('loadingState');
+const resultsEl  = document.getElementById('resultsSection');
+const errorBox   = document.getElementById('errorBox');
+const downloadBtn= document.getElementById('downloadBtn');
+const modalOverlay=document.getElementById('modalOverlay');
+
+let selectedFile = null;
+let pdfB64       = null;
+
+// ── File handling ─────────────────────────────────────────────────
+uploadZone.addEventListener('click', () => imageInput.click());
+imageInput.addEventListener('change', e => { if(e.target.files[0]) setFile(e.target.files[0]); });
+uploadZone.addEventListener('dragover',  e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('dragover');
+  if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+
+function setFile(file) {
+  selectedFile = file;
+  fileNameEl.textContent = file.name;
+  fileNameEl.classList.remove('hidden');
+  predictBtn.disabled = false;
+  hideError();
+}
+
+// ── Run analysis ──────────────────────────────────────────────────
+predictBtn.addEventListener('click', async () => {
+  if(!selectedFile) return;
+
+  predictBtn.disabled = true;
+  resetBtn.classList.remove('hidden');
+  loadingEl.classList.remove('hidden');
+  resultsEl.classList.add('hidden');
+  hideError();
+  animateSteps();
+
+  const formData = new FormData();
+  formData.append('image', selectedFile);
+
+  try {
+    const res  = await fetch('/api/predict/', { method:'POST', body:formData });
+    const data = await res.json();
+    if(!res.ok){ showError(data.error || 'Prediction failed.'); return; }
+    renderResults(data);
+  } catch(err) {
+    showError('Network error. Is the server running?');
+  } finally {
+    loadingEl.classList.add('hidden');
+    predictBtn.disabled = false;
+  }
+});
+
+// ── Animate loading steps ─────────────────────────────────────────
+function animateSteps() {
+  const steps = ['step1','step2','step3','step4','step5'];
+  const delays = [0, 1200, 2400, 3600, 5000];
+  steps.forEach((id, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      el.classList.add('active');
+      el.querySelector('.dot').classList.add('active');
+    }, delays[i]);
+  });
+}
+
+// ── Render results ────────────────────────────────────────────────
+function renderResults(data) {
+  const abn  = data.abnormality;
+  const path = data.pathology;
+  const seg  = data.segmentation;
+  const rep  = data.clinical_report;
+
+  setLabel('abnLabel',  abn.label,  `badge-${abn.label}`);
+  document.getElementById('abnConf').textContent = pct(abn.confidence);
+  document.getElementById('abnBar').style.width  = pct(abn.confidence);
+  document.getElementById('probMass').textContent = pct(abn.probabilities.mass);
+  document.getElementById('probCalc').textContent = pct(abn.probabilities.calcification);
+
+  setLabel('pathLabel', path.label, `badge-${path.label}`);
+  document.getElementById('pathConf').textContent = pct(path.confidence);
+  document.getElementById('pathBar').style.width  = pct(path.confidence);
+  document.getElementById('probBenign').textContent    = pct(path.probabilities.benign);
+  document.getElementById('probMalignant').textContent = pct(path.probabilities.malignant);
+
+  document.getElementById('imgMask').src    = `data:image/png;base64,${seg.mask_b64}`;
+  document.getElementById('imgOverlay').src = `data:image/png;base64,${seg.overlay_b64}`;
+  document.getElementById('imgGradcam').src = `data:image/png;base64,${data.gradcam_b64}`;
+  document.getElementById('coverage').textContent = `${seg.coverage_pct}%`;
+
+  const sectionTitles = {
+    'clinical indication':'Clinical Indication',
+    'technique':'Technique','findings':'Findings',
+    'impression':'Impression','recommendation':'Recommendation',
+    'disclaimer':'Disclaimer','full_report':'Report'
+  };
+  const reportDiv = document.getElementById('reportSections');
+  reportDiv.innerHTML = '';
+  for(const [key, title] of Object.entries(sectionTitles)){
+    const text = rep.sections[key];
+    if(text) reportDiv.innerHTML += `<div class="report-section"><h4>${title}</h4><p>${text}</p></div>`;
+  }
+  document.getElementById('reportModel').textContent = rep.model_used;
+
+  pdfB64 = data.pdf_b64;
+  resultsEl.classList.remove('hidden');
+  resultsEl.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ── Download — show modal first ───────────────────────────────────
+downloadBtn.addEventListener('click', () => {
+  // Pre-fill today's date
+  document.getElementById('examDate').value = new Date().toISOString().split('T')[0];
+  modalOverlay.classList.remove('hidden');
+});
+
+// Skip — download current PDF (no patient info)
+document.getElementById('skipBtn').addEventListener('click', () => {
+  modalOverlay.classList.add('hidden');
+  triggerDownload(pdfB64);
+});
+
+// Confirm — rebuild PDF with patient info via a second call
+document.getElementById('confirmBtn').addEventListener('click', async () => {
+  const patientInfo = {
+    patient_name:       document.getElementById('patientName').value.trim(),
+    patient_id:         document.getElementById('patientId').value.trim(),
+    referring_physician:document.getElementById('referringPhysician').value.trim(),
+    exam_date:          document.getElementById('examDate').value,
+    clinical_notes:     document.getElementById('clinicalNotes').value.trim(),
+  };
+
+  modalOverlay.classList.add('hidden');
+
+  // If any field filled, regenerate with patient info
+  const hasData = Object.values(patientInfo).some(v => v);
+  if(!hasData){ triggerDownload(pdfB64); return; }
+
+  // Regenerate
+  const formData = new FormData();
+  formData.append('image', selectedFile);
+  formData.append('patient_info', JSON.stringify(patientInfo));
+
+  try {
+    const res  = await fetch('/api/predict/', { method:'POST', body:formData });
+    const data = await res.json();
+    if(res.ok) triggerDownload(data.pdf_b64);
+    else showError('Could not regenerate report. Downloading existing PDF.');
+  } catch {
+    triggerDownload(pdfB64);
+  }
+});
+
+// Close modal on overlay click
+modalOverlay.addEventListener('click', e => {
+  if(e.target === modalOverlay) modalOverlay.classList.add('hidden');
+});
+
+function triggerDownload(b64) {
+  if(!b64) return;
+  const bytes = atob(b64);
+  const arr   = new Uint8Array(bytes.length);
+  for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+  const blob  = new Blob([arr], {type:'application/pdf'});
+  const url   = URL.createObjectURL(blob);
+  const link  = document.createElement('a');
+  link.href = url; link.download = 'deepmammo_report.pdf'; link.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Reset ─────────────────────────────────────────────────────────
+resetBtn.addEventListener('click', () => {
+  selectedFile = null; pdfB64 = null;
+  imageInput.value = '';
+  fileNameEl.classList.add('hidden');
+  predictBtn.disabled = true;
+  resetBtn.classList.add('hidden');
+  resultsEl.classList.add('hidden');
+  hideError();
+  // Reset loading steps
+  ['step1','step2','step3','step4','step5'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('active');
+    el.querySelector('.dot').classList.remove('active');
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+// ── Helpers ───────────────────────────────────────────────────────
+function pct(val){ return (val*100).toFixed(1)+'%'; }
+function setLabel(id, text, cls){
+  const el = document.getElementById(id);
+  el.textContent = text.charAt(0).toUpperCase()+text.slice(1);
+  el.className   = `badge ${cls}`;
+}
+function showError(msg){ errorBox.textContent='⚠ '+msg; errorBox.classList.remove('hidden'); }
+function hideError(){ errorBox.classList.add('hidden'); }
+</script>
+{% endblock %}

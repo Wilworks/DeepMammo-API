@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}DeepMammo — AI Breast Cancer Detection{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Hero ──────────────────────────────────────────────────────────── */
+.hero {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 5rem 2rem 4rem;
+  text-align: center;
+}
+.hero-eyebrow {
+  display: inline-block;
+  background: var(--purple-light);
+  color: var(--purple);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.35rem 1rem;
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text-dark);
+  margin-bottom: 1.25rem;
+}
+.hero h1 span { color: var(--purple); }
+.hero p {
+  font-size: 1.05rem;
+  color: var(--text-mid);
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.75;
+}
+.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* ── Medical relevance ─────────────────────────────────────────────── */
+.relevance {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 4rem 2rem;
+}
+.relevance-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2rem;
+}
+@media (max-width: 640px) {
+  .relevance-inner { grid-template-columns: 1fr; }
+}
+.stat-card {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.stat-card .stat-number {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--purple);
+  line-height: 1;
+}
+.stat-card .stat-label {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-mid);
+  line-height: 1.4;
+}
+
+/* ── How it works ──────────────────────────────────────────────────── */
+.how-it-works {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+.how-it-works h2 {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+.how-it-works .sub {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin-bottom: 2.5rem;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem;
+}
+.step {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+}
+.step-num {
+  width: 36px; height: 36px;
+  background: var(--purple-light);
+  color: var(--purple);
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+.step h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+.step p  { font-size: 0.82rem; color: var(--text-mid); line-height: 1.5; }
+
+/* ── CTA banner ────────────────────────────────────────────────────── */
+.cta-banner {
+  background: var(--purple);
+  color: white;
+  text-align: center;
+  padding: 3.5rem 2rem;
+}
+.cta-banner h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.75rem; }
+.cta-banner p  { opacity: 0.85; font-size: 0.95rem; margin-bottom: 1.75rem; }
+.cta-banner .btn-primary {
+  background: white;
+  color: var(--purple);
+}
+.cta-banner .btn-primary:hover {
+  background: var(--purple-light);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="hero">
+  <span class="hero-eyebrow">Powered by EfficientNet-B4 + FPN + CBAM</span>
+  <h1>AI-Assisted <span>Breast Cancer</span><br>Detection from Mammograms</h1>
+  <p>
+    DeepMammo is a multi-task deep learning system trained on over 45,000
+    mammogram images. It simultaneously detects abnormality type, predicts
+    pathology, segments lesion regions, and generates a structured clinical report —
+    in seconds.
+  </p>
+  <div class="hero-actions">
+    <a href="/dashboard" class="btn btn-primary">
+      &#8594; Make a Prediction
+    </a>
+    <a href="/tutorial" class="btn btn-outline">How it works</a>
+  </div>
+</section>
+
+<!-- Medical relevance stats -->
+<section class="relevance">
+  <div class="relevance-inner">
+    <div class="stat-card">
+      <div class="stat-number">1 in 8</div>
+      <div class="stat-label">Women will develop breast cancer in their lifetime</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">99%</div>
+      <div class="stat-label">5-year survival rate when detected at the localised stage</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">45k+</div>
+      <div class="stat-label">Augmented mammogram images used to train DeepMammo</div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="how-it-works">
+  <h2>How DeepMammo Works</h2>
+  <p class="sub">From image upload to clinical report in four steps</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Upload</h3>
+      <p>Upload a PNG or JPG mammogram image from your device.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Preprocess</h3>
+      <p>CLAHE enhancement, Otsu masking, and breast tissue isolation.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Analyse</h3>
+      <p>EfficientNet-B4 encoder with FPN neck runs simultaneous segmentation and classification.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Report</h3>
+      <p>Structured clinical report generated with findings, impression, and recommendation.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-banner">
+  <h2>Ready to analyse a mammogram?</h2>
+  <p>Upload an image and receive a full AI analysis report in seconds.</p>
+  <a href="/dashboard" class="btn btn-primary">Get Started &rarr;</a>
+</section>
+
+{% endblock %}
