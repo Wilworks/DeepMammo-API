@@ -20,6 +20,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
 ]
 
@@ -47,6 +48,8 @@ STATIC_URL   = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT  = BASE_DIR / 'staticfiles'
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     'DEFAULT_PARSER_CLASSES': [
@@ -58,4 +61,4 @@ REST_FRAMEWORK = {
 MODEL_PATH   = BASE_DIR / 'model' / 'deepmammo.onnx'
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024  # 20MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
