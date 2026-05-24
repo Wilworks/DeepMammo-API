@@ -1,13 +1,12 @@
 ---
 title: DeepMammo
-emoji: 
+emoji: "🔬"
 colorFrom: purple
 colorTo: indigo
 sdk: docker
 pinned: true
 license: mit
 ---
-
 # DeepMammo — AI-Assisted Mammography Analysis
 
 A production-grade multi-task deep learning inference API for breast cancer detection from mammogram images.
