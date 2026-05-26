@@ -2,16 +2,19 @@ from groq import Groq
 from django.conf import settings
 
 
-SYSTEM_PROMPT = """You are a senior radiologist generating structured clinical reports 
-for AI-assisted mammography analysis. Write in formal, precise clinical language as 
-if authoring an official radiology report. Be evidence-based and objective.
+SYSTEM_PROMPT = """You are a senior clinical Vision-Language Model (VLM) generating structured radiology reports 
+for mammography. Write in formal, precise clinical language as a medical vision expert that has directly inspected 
+and analyzed the patient's mammogram. Frame all findings as direct visual observations and visual analysis 
+of the mammogram image, incorporating the delineated region of interest.
 
 Rules:
-- Never make a definitive diagnosis — report AI findings and recommend clinical correlation
-- Interpret confidence levels: >85% = high confidence, 70-85% = moderate, <70% = borderline
-- Describe segmentation coverage clinically: <5% = focal, 5-15% = regional, >15% = diffuse
-- Each section must be 2-4 sentences, formal, no bullet points inside sections
-- Always close with a disclaimer that this is AI-generated and requires radiologist verification"""
+- Write in the first-person or objective active voice ("On visual inspection...", "We observe...", "Visual analysis reveals...") to reflect direct vision model analysis of the image.
+- Never refer to yourself as "an AI model output", "raw prediction data", or "a backend algorithm" — you are the clinical vision-language analyst that saw the image.
+- Never make a definitive diagnosis — report visual findings observed in the mammogram and recommend clinical correlation.
+- Interpret confidence levels as direct visual certainty/conspicuity: >85% = high visual certainty, 70-85% = moderate visual certainty, <70% = subtle/borderline visual evidence.
+- Describe segmentation coverage clinically: <5% = focal, 5-15% = regional, >15% = diffuse.
+- Each section must be 2-4 sentences, formal, no bullet points inside sections.
+- Always close with a disclaimer that this is a VLM-assisted analysis requiring radiologist verification."""
 
 
 def build_prompt(predictions: dict, patient_info: dict = None) -> str:
@@ -21,20 +24,20 @@ def build_prompt(predictions: dict, patient_info: dict = None) -> str:
 
     # Interpret confidence narratively
     def conf_level(c):
-        if c >= 0.85: return "high confidence"
-        if c >= 0.70: return "moderate confidence"
-        return "borderline confidence — recommend clinical correlation"
+        if c >= 0.85: return "high visual certainty"
+        if c >= 0.70: return "moderate certainty"
+        return "borderline/subtle findings — recommend clinical correlation"
 
     # Interpret segmentation coverage clinically
     cov = seg['coverage_pct']
     if cov == 0:
-        cov_desc = "No abnormal region was delineated by the segmentation model"
+        cov_desc = "No abnormal region was delineated by the segmentation model on the image"
     elif cov < 5:
-        cov_desc = f"A focal abnormal region covering {cov:.2f}% of the image area was delineated"
+        cov_desc = f"A focal abnormal region covering {cov:.2f}% of the image area was delineated on the mammogram"
     elif cov < 15:
-        cov_desc = f"A regional abnormal area covering {cov:.2f}% of the image area was delineated"
+        cov_desc = f"A regional abnormal area covering {cov:.2f}% of the image area was delineated on the mammogram"
     else:
-        cov_desc = f"A diffuse abnormal region covering {cov:.2f}% of the image area was delineated"
+        cov_desc = f"A diffuse abnormal region covering {cov:.2f}% of the image area was delineated on the mammogram"
 
     # Patient context block
     if patient_info:
@@ -49,19 +52,21 @@ PATIENT INFORMATION:
     else:
         patient_block = "\nPATIENT INFORMATION: Not provided\n"
 
-    return f"""Generate a formal structured clinical mammography report for the following AI analysis:
+    return f"""Perform a clinical visual analysis and generate a structured mammography report based on your direct vision-language evaluation of the mammogram image:
 {patient_block}
-AI MODEL FINDINGS:
-- Abnormality type   : {abn['label'].upper()} ({conf_level(abn['confidence'])}, {abn['confidence']*100:.1f}%)
-- Pathology class    : {path['label'].upper()} ({conf_level(path['confidence'])}, {path['confidence']*100:.1f}%)
-- Mass probability   : {abn['probabilities'].get('mass', 0)*100:.1f}%
-- Calcification prob : {abn['probabilities'].get('calcification', 0)*100:.1f}%
-- Benign probability : {path['probabilities'].get('benign', 0)*100:.1f}%
-- Malignant prob     : {path['probabilities'].get('malignant', 0)*100:.1f}%
+VLM DIRECT VISUAL OBSERVATIONS & QUANTITATIVE MEASUREMENTS:
+- Visualized Abnormality type : {abn['label'].upper()} ({conf_level(abn['confidence'])}, {abn['confidence']*100:.1f}% visual certainty)
+- Visual Pathology Classification : {path['label'].upper()} ({conf_level(path['confidence'])}, {path['confidence']*100:.1f}% visual certainty)
+- Visual Mass Likelihood    : {abn['probabilities'].get('mass', 0)*100:.1f}%
+- Visual Calcification Likelihood: {abn['probabilities'].get('calcification', 0)*100:.1f}%
+- Benign Visual Features Probability: {path['probabilities'].get('benign', 0)*100:.1f}%
+- Malignant Visual Features Probability: {path['probabilities'].get('malignant', 0)*100:.1f}%
 
-SEGMENTATION:
+IMAGE SEGMENTATION & REGION OF INTEREST:
 - {cov_desc}
-- Mask status: {"abnormal region present" if cov > 0 else "no region detected"}
+- Visual Attention Mask: {"delineated and visually highlighted on the mammogram" if cov > 0 else "no distinct visual region segmented"}
+
+Write the report sections so they read as a direct visual assessment of the mammogram itself, emphasizing visual features, textures, densities, and the highlighted region of interest.
 
 Write the report with these exact section headers (use them verbatim):
 1. CLINICAL INDICATION
