@@ -33,6 +33,16 @@ Upload a mammogram image and get back:
 | Cls heads | Abnormality + Pathology (multi-task) |
 | Format | ONNX (exported from PyTorch) |
 
+## Model Weights
+
+The trained model file (`model/deepmammo.onnx`) is **not included in this repository**.
+
+To obtain the weights, contact:
+
+**Wilfred Ayine** — [GitHub @Wilworks](https://github.com/Wilworks) · wilfredayine@gmail.com
+
+Once received, place the file at `model/deepmammo.onnx` before running the API.
+
 ## Training Data
 
 | Dataset | Images |
@@ -63,4 +73,4 @@ Python · PyTorch → ONNX · onnxruntime · Django · DRF · Groq LLM · Report
 **Wilfred Ayine** — AI Engineer (Junior)
 
 ---
-⚠️ This is a research demo. Not validated for clinical use. Always consult a qualified radiologist.
+This is a research demo. Not validated for clinical use. Always consult a qualified radiologist.
