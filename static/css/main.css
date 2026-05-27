@@ -811,6 +811,8 @@ footer a:hover { color: var(--purple) !important; }
   height: 100%;
   width: 100%;
   display: none;
+  min-height: 0;
+  overflow: hidden;
 }
 .workspace-tab.active-tab {
   display: block;
@@ -822,6 +824,7 @@ footer a:hover { color: var(--purple) !important; }
   grid-template-columns: 1fr 1fr;
   height: 100%;
   width: 100%;
+  min-height: 0;
 }
 #workspace-playground.workspace-tab.active-tab .controller-panel,
 #workspace-playground.workspace-tab.active-tab .monitor-panel {
