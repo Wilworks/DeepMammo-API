@@ -82,37 +82,34 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     story.append(Spacer(1, 12))
 
     # ── Prediction summary table ─────────────────────────────────────
-    story.append(Paragraph("AI Prediction Summary", styles['section']))
+    story.append(Paragraph("AI Triage Summary", styles['section']))
     story.append(Spacer(1, 6))
 
-    def conf_label(c):
+    def urgency_label(c):
         if c >= 0.85: return "HIGH"
         if c >= 0.70: return "MODERATE"
-        return "BORDERLINE"
+        return "LOW"
 
     summary_data = [
-        ['Finding', 'Result Type', 'Confidence', 'Triage Level'],
+        ['Primary Finding', 'Confidence', 'Urgency Level'],
         [
-            'Abnormality Type', 
-            abn['label'].title(), 
-            f"{abn['confidence']*100:.1f}%", 
-            conf_label(abn['confidence'])
+            f"Abnormality: {abn['label'].title()}",
+            f"{abn['confidence']*100:.1f}%",
+            urgency_label(abn['confidence']),
         ],
         [
-            'Pathology', 
-            path['label'].title(), 
-            f"{path['confidence']*100:.1f}%", 
-            conf_label(path['confidence'])
+            f"Pathology: {path['label'].title()}",
+            f"{path['confidence']*100:.1f}%",
+            urgency_label(path['confidence']),
         ],
         [
-            'Region Coverage',
-            f"{seg['coverage_pct']:.2f}% of image",
+            f"Region Coverage: {seg['coverage_pct']:.2f}% of image",
             '—',
-            'SEGMENTATION'
-        ]
+            'SEGMENTATION',
+        ],
     ]
 
-    table = Table(summary_data, colWidths=[4.5*cm, 4.5*cm, 3.5*cm, 4.5*cm])
+    table = Table(summary_data, colWidths=[7*cm, 4*cm, 5*cm])
     table.setStyle(TableStyle([
         ('BACKGROUND',  (0,0), (-1,0), PURPLE),
         ('TEXTCOLOR',   (0,0), (-1,0), colors.white),
