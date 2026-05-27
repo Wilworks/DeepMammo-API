@@ -4,7 +4,9 @@
 
 {% block extra_css %}
 <style>
-html, body { overflow: hidden !important; }
+@media (min-width: 1025px) {
+  html, body { overflow: hidden !important; }
+}
 .controller-panel h1, .monitor-panel h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--brand-navy); }
 .controller-panel .sub, .monitor-panel .sub { color: var(--text-light); font-size: 0.88rem; margin-bottom: 2rem; }
 

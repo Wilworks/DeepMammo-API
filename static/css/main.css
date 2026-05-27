@@ -913,6 +913,21 @@ footer a:hover { color: var(--purple) !important; }
 @media (max-width: 1024px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .workspace-tab {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  #workspace-playground.workspace-tab.active-tab {
+    grid-template-columns: 1fr;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .controller-panel, .monitor-panel {
+    height: auto !important;
+    overflow-y: visible !important;
   }
   .sidebar-panel {
     border-right: none;
