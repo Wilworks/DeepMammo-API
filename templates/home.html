@@ -5,262 +5,1093 @@
 
 {% block extra_css %}
 <style>
-  /* ── Hero ──────────────────────────────────────────────────────────── */
-  .hero {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 5rem 2rem 4rem;
-    text-align: center;
-  }
+/* ─────────────────────────────────────────────────────────────────────
+   HOME PAGE — Premium Redesign
+   Uses only existing brand tokens from main.css
+   ───────────────────────────────────────────────────────────────────── */
 
-  .hero-eyebrow {
-    display: inline-block;
-    background: var(--purple-light);
-    color: var(--purple);
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.35rem 1rem;
-    border-radius: 20px;
-    margin-bottom: 1.5rem;
-  }
+/* ── Hero ──────────────────────────────────────────────────────────── */
+.hero-section {
+  background: linear-gradient(135deg, #082F49 0%, #0A1628 60%, #0d1f35 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 5.5rem 2rem 6rem;
+  min-height: 620px;
+  display: flex;
+  align-items: center;
+}
 
-  .hero h1 {
-    font-size: clamp(2rem, 5vw, 3rem);
-    font-weight: 800;
-    line-height: 1.2;
-    color: var(--text-dark);
-    margin-bottom: 1.25rem;
-  }
+/* Radial glow behind hero */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-55%);
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(16,185,129,0.10) 0%, transparent 65%);
+  pointer-events: none;
+}
 
-  .hero h1 span {
-    color: var(--purple);
-  }
+/* Subtle grid overlay */
+.hero-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
 
-  .hero p {
-    font-size: 1.05rem;
-    color: var(--text-mid);
-    max-width: 600px;
-    margin: 0 auto 2.5rem;
-    line-height: 1.75;
-  }
+.hero-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
 
-  .hero-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
+@media (max-width: 860px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 3rem; }
+  .hero-visual { display: none; }
+}
 
-  /* ── Medical relevance ─────────────────────────────────────────────── */
-  .relevance {
-    background: var(--white);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    padding: 4rem 2rem;
-  }
+/* Eyebrow pill */
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.25);
+  color: #10B981;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.38rem 1rem;
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+}
 
-  .relevance-inner {
-    max-width: 900px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 2rem;
-  }
+.eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  background: #10B981;
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.4; transform: scale(0.75); }
+}
 
-  @media (max-width: 640px) {
-    .relevance-inner {
-      grid-template-columns: 1fr;
-    }
-  }
+/* Hero headline */
+.hero-headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 4.5vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+  margin-bottom: 1.4rem;
+  letter-spacing: -0.02em;
+}
 
-  .stat-card {
-    text-align: center;
-    padding: 1.5rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-  }
+.hero-headline .gradient-text {
+  background: linear-gradient(90deg, #10B981, #38BDF8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-  .stat-card .stat-number {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: var(--purple);
-    line-height: 1;
-  }
+.hero-sub {
+  font-size: 1.02rem;
+  color: rgba(255,255,255,0.68);
+  line-height: 1.8;
+  max-width: 500px;
+  margin-bottom: 2.25rem;
+}
 
-  .stat-card .stat-label {
-    margin-top: 0.5rem;
-    font-size: 0.85rem;
-    color: var(--text-mid);
-    line-height: 1.4;
-  }
+/* CTA row */
+.hero-cta-row {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
 
-  /* ── How it works ──────────────────────────────────────────────────── */
-  .how-it-works {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 4rem 2rem;
-  }
+.btn-hero-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #10B981, #059669, #10B981);
+  background-size: 200% auto;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0.75rem 1.6rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  letter-spacing: 0.01em;
+}
+.btn-hero-primary:hover {
+  animation: shimmer 1.5s linear infinite;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(16,185,129,0.4);
+  color: #fff;
+}
+@keyframes shimmer {
+  0% { background-position: 0% center; }
+  100% { background-position: -200% center; }
+}
 
-  .how-it-works h2 {
-    text-align: center;
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 0.5rem;
-  }
+.btn-hero-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.85);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 0.75rem 1.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+.btn-hero-ghost:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.25);
+  color: #fff;
+  transform: translateY(-1px);
+}
 
-  .how-it-works .sub {
-    text-align: center;
-    color: var(--text-light);
-    font-size: 0.9rem;
-    margin-bottom: 2.5rem;
-  }
+/* Inline trust metrics */
+.hero-trust-row {
+  display: flex;
+  gap: 1.75rem;
+  flex-wrap: wrap;
+}
+.trust-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.trust-metric .t-val {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.trust-metric .t-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 
-  .steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1.25rem;
-  }
+/* ── Hero Visual: Stylised Scan Card ──────────────────────────────── */
+.hero-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
 
-  .step {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem 1.25rem;
-    text-align: center;
-  }
+.scan-card-mockup {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 18px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  width: 340px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(16,185,129,0.08);
+  animation: float 5s ease-in-out infinite;
+}
 
-  .step-num {
-    width: 36px;
-    height: 36px;
-    background: var(--purple-light);
-    color: var(--purple);
-    border-radius: 50%;
-    font-weight: 700;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-  }
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
 
-  .step h3 {
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin-bottom: 0.4rem;
-  }
+.scan-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.scan-card-title {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.scan-status-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(16,185,129,0.15);
+  color: #10B981;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 
-  .step p {
-    font-size: 0.82rem;
-    color: var(--text-mid);
-    line-height: 1.5;
-  }
+/* Fake mammogram scan area */
+.scan-image-area {
+  height: 200px;
+  background: linear-gradient(135deg, #0d1a28, #0f2133);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 1rem;
+}
 
-  /* ── CTA banner ────────────────────────────────────────────────────── */
-  .cta-banner {
-    background: var(--purple);
-    color: white;
-    text-align: center;
-    padding: 3.5rem 2rem;
-  }
+.scan-image-area svg {
+  opacity: 0.6;
+}
 
-  .cta-banner h2 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-  }
+/* Scanning line animation */
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(16,185,129,0.7), transparent);
+  animation: scan 3s ease-in-out infinite;
+}
+@keyframes scan {
+  0%   { top: 0%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
 
-  .cta-banner p {
-    opacity: 0.85;
-    font-size: 0.95rem;
-    margin-bottom: 1.75rem;
-  }
+/* Scan card metrics row */
+.scan-metrics-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+.scan-metric-chip {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+.scan-metric-chip .chip-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+.scan-metric-chip .chip-value {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+}
+.chip-value.emerald { color: #10B981; }
+.chip-value.amber   { color: #EF9F27; }
+.chip-value.coral   { color: #D85A30; }
 
-  .cta-banner .btn-primary {
-    background: white;
-    color: var(--purple);
-  }
+/* Confidence bar in scan card */
+.scan-conf-bar-wrap { margin-top: 0.6rem; }
+.scan-conf-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.scan-conf-track {
+  height: 4px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.scan-conf-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #10B981, #38BDF8);
+  animation: fillup 2.5s ease-out forwards;
+}
+@keyframes fillup {
+  from { width: 0%; }
+  to   { width: 91%; }
+}
 
-  .cta-banner .btn-primary:hover {
-    background: var(--purple-light);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
+/* ── Stats Band ────────────────────────────────────────────────────── */
+.stats-band {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 3.5rem 2rem;
+}
+.stats-band-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+@media (max-width: 640px) {
+  .stats-band-inner { grid-template-columns: 1fr; }
+}
+
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--white);
+  border-left: 4px solid var(--border);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.stat-block::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 70%, rgba(8,47,73,0.03));
+  pointer-events: none;
+}
+.stat-block:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(8,47,73,0.08);
+}
+.stat-block.emerald-accent { border-left-color: #10B981; }
+.stat-block.amber-accent   { border-left-color: #EF9F27; }
+.stat-block.coral-accent   { border-left-color: #082F49; }
+
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--brand-navy);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.03em;
+}
+.stat-desc {
+  font-size: 0.875rem;
+  color: var(--text-mid);
+  line-height: 1.55;
+  font-weight: 500;
+}
+.stat-tag {
+  margin-top: 0.85rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-light);
+}
+
+/* ── How It Works ──────────────────────────────────────────────────── */
+.how-section {
+  background: var(--bg);
+  padding: 5rem 2rem;
+}
+.how-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.section-eyebrow {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #10B981;
+  margin-bottom: 0.75rem;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.02em;
+}
+.section-sub {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin-bottom: 3rem;
+  max-width: 520px;
+}
+
+.steps-flow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  position: relative;
+}
+@media (max-width: 768px) {
+  .steps-flow { grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .step-connector { display: none; }
+}
+@media (max-width: 480px) {
+  .steps-flow { grid-template-columns: 1fr; }
+}
+
+.step-cell {
+  position: relative;
+  padding: 2rem 1.5rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 0 0.5rem;
+  transition: all 0.25s ease;
+  cursor: default;
+}
+.step-cell:first-child { margin-left: 0; }
+.step-cell:last-child  { margin-right: 0; }
+
+.step-cell:hover {
+  transform: translateY(-4px);
+  border-color: rgba(16,185,129,0.4);
+  box-shadow: 0 8px 28px rgba(16,185,129,0.10), 0 0 0 1px rgba(16,185,129,0.15);
+}
+
+.step-badge {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #082F49, #0d3d5e);
+  color: #fff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 1.1rem;
+  box-shadow: 0 4px 12px rgba(8,47,73,0.25);
+}
+.step-cell:hover .step-badge {
+  background: linear-gradient(135deg, #10B981, #059669);
+  box-shadow: 0 4px 16px rgba(16,185,129,0.35);
+}
+
+.step-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+.step-desc {
+  font-size: 0.83rem;
+  color: var(--text-mid);
+  line-height: 1.65;
+}
+
+/* Arrow connector between steps */
+.step-arrow {
+  position: absolute;
+  top: 50%;
+  right: -14px;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 28px;
+  height: 28px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+  font-size: 0.7rem;
+}
+
+/* ── Model Bento (dark section) ───────────────────────────────────── */
+.bento-section {
+  background: linear-gradient(160deg, #082F49 0%, #061f35 50%, #0A1628 100%);
+  padding: 5.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.bento-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+.bento-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.bento-header .section-eyebrow { color: #10B981; }
+.bento-header .section-title { color: #fff; }
+.bento-header .section-sub { color: rgba(255,255,255,0.55); }
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+@media (max-width: 640px) {
+  .bento-grid { grid-template-columns: 1fr; }
+}
+
+.bento-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 1.75rem;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+}
+.bento-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.bento-card:nth-child(1) { transition-delay: 0s; }
+.bento-card:nth-child(2) { transition-delay: 0.1s; }
+.bento-card:nth-child(3) { transition-delay: 0.2s; }
+.bento-card:nth-child(4) { transition-delay: 0.3s; }
+
+.bento-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(16,185,129,0.35), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.bento-card:hover {
+  border-color: rgba(16,185,129,0.25);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(16,185,129,0.12);
+  transform: translateY(-3px) !important;
+}
+.bento-card:hover::after { opacity: 1; }
+
+.bento-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.1rem;
+}
+.bento-icon.emerald-bg { background: rgba(16,185,129,0.15); }
+.bento-icon.navy-bg    { background: rgba(56,189,248,0.12); }
+.bento-icon.amber-bg   { background: rgba(239,159,39,0.12); }
+.bento-icon.coral-bg   { background: rgba(216,90,48,0.12); }
+
+.bento-metric-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 0.85rem;
+  background: rgba(16,185,129,0.15);
+  color: #10B981;
+}
+.bento-metric-badge.sky   { background: rgba(56,189,248,0.12); color: #38BDF8; }
+.bento-metric-badge.amber { background: rgba(239,159,39,0.12); color: #EF9F27; }
+.bento-metric-badge.coral { background: rgba(216,90,48,0.12); color: #D85A30; }
+
+.bento-card-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+.bento-card-desc {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.7;
+}
+
+/* ── Accuracy Block ────────────────────────────────────────────────── */
+.accuracy-section {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 5rem 2rem;
+}
+.accuracy-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 4rem;
+  align-items: center;
+}
+@media (max-width: 720px) {
+  .accuracy-inner { grid-template-columns: 1fr; gap: 2rem; }
+}
+.accuracy-big-num {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 9vw, 6.5rem);
+  font-weight: 800;
+  color: var(--brand-navy);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.accuracy-big-num span {
+  font-size: 2.5rem;
+  color: #10B981;
+}
+.accuracy-big-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-light);
+  margin-top: 0.5rem;
+}
+.accuracy-copy .section-title { font-size: 1.6rem; }
+.accuracy-copy p {
+  color: var(--text-mid);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+}
+.peer-reviewed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #10B981;
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.2);
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── CTA Band ──────────────────────────────────────────────────────── */
+.cta-section {
+  background: linear-gradient(135deg, #082F49 0%, #0A1628 100%);
+  padding: 5.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+/* Circuit pattern overlay */
+.cta-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(16,185,129,0.06) 1px, transparent 1px);
+  background-size: 36px 36px;
+  pointer-events: none;
+}
+.cta-section::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(16,185,129,0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+.cta-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 620px;
+  margin: 0 auto;
+}
+.cta-headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+.cta-sub {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.75;
+  margin-bottom: 2rem;
+}
+.cta-badge-row {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.75rem;
+}
+.cta-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.45);
+  border: 1px solid rgba(255,255,255,0.10);
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- Hero -->
-<section class="hero">
-  <span class="hero-eyebrow">Powered by EfficientNet-B4 + FPN + CBAM</span>
-  <h1>AI-Assisted <span>Breast Cancer</span><br>Detection from Mammograms</h1>
-  <p>
-    DeepMammo is a multi-task deep learning system trained on over 45,000
-    mammogram images. It simultaneously detects abnormality type, predicts
-    pathology, segments lesion regions, and generates a structured clinical report —
-    in seconds.
-  </p>
-  <div class="hero-actions">
-    <a href="/dashboard" class="btn btn-primary">
-      &#8594; Make a Prediction
+<!-- ── 1. Hero ──────────────────────────────────────────────────────── -->
+<section class="hero-section">
+  <div class="hero-inner">
+
+    <!-- Left: Copy -->
+    <div class="hero-copy">
+      <span class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        EfficientNet-B4 · FPN · CBAM
+      </span>
+
+      <h1 class="hero-headline">
+        AI-Assisted<br>
+        <span class="gradient-text">Breast Cancer</span><br>
+        Detection
+      </h1>
+
+      <p class="hero-sub">
+        DeepMammo is a multi-task deep learning system trained on over 45,000 mammogram
+        images. Abnormality detection, pathology classification, lesion segmentation,
+        and a structured clinical report — generated in seconds.
+      </p>
+
+      <div class="hero-cta-row">
+        <a href="/dashboard" class="btn-hero-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+          Run Analysis
+        </a>
+        <a href="/tutorial" class="btn-hero-ghost">
+          View Architecture
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <div class="hero-trust-row">
+        <div class="trust-metric">
+          <span class="t-val">45k+</span>
+          <span class="t-label">Training Images</span>
+        </div>
+        <div class="trust-metric">
+          <span class="t-val">99%</span>
+          <span class="t-label">Early-Stage Survival</span>
+        </div>
+        <div class="trust-metric">
+          <span class="t-val">&lt;3s</span>
+          <span class="t-label">Report Generation</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Stylised Scan Card Mockup -->
+    <div class="hero-visual">
+      <div class="scan-card-mockup">
+        <div class="scan-card-header">
+          <span class="scan-card-title">DeepMammo Analysis</span>
+          <span class="scan-status-badge">Live</span>
+        </div>
+
+        <!-- Fake scan area with SVG breast silhouette -->
+        <div class="scan-image-area">
+          <div class="scan-line"></div>
+          <svg width="120" height="160" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Stylised breast contour -->
+            <ellipse cx="60" cy="100" rx="52" ry="55" fill="rgba(56,189,248,0.06)" stroke="rgba(56,189,248,0.18)" stroke-width="1.5"/>
+            <!-- Glandular tissue suggestion -->
+            <ellipse cx="60" cy="90" rx="32" ry="38" fill="rgba(56,189,248,0.04)" stroke="rgba(56,189,248,0.10)" stroke-width="1"/>
+            <!-- Lesion highlight circle -->
+            <circle cx="72" cy="75" r="11" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <!-- GradCAM heatmap suggestion -->
+            <circle cx="72" cy="75" r="18" fill="rgba(16,185,129,0.04)" stroke="rgba(16,185,129,0.15)" stroke-width="0.8"/>
+            <!-- Annotation cross-hairs -->
+            <line x1="72" y1="65" x2="72" y2="85" stroke="rgba(16,185,129,0.5)" stroke-width="0.8"/>
+            <line x1="62" y1="75" x2="82" y2="75" stroke="rgba(16,185,129,0.5)" stroke-width="0.8"/>
+          </svg>
+        </div>
+
+        <!-- Metric chips -->
+        <div class="scan-metrics-row">
+          <div class="scan-metric-chip">
+            <div class="chip-label">Abnormality</div>
+            <div class="chip-value emerald">Mass</div>
+          </div>
+          <div class="scan-metric-chip">
+            <div class="chip-label">Pathology</div>
+            <div class="chip-value amber">Benign</div>
+          </div>
+          <div class="scan-metric-chip">
+            <div class="chip-label">Coverage</div>
+            <div class="chip-value">4.7%</div>
+          </div>
+          <div class="scan-metric-chip">
+            <div class="chip-label">Triage</div>
+            <div class="chip-value coral">Moderate</div>
+          </div>
+        </div>
+
+        <!-- Confidence bar -->
+        <div class="scan-conf-bar-wrap">
+          <div class="scan-conf-label">
+            <span>AI Confidence</span>
+            <span>91%</span>
+          </div>
+          <div class="scan-conf-track">
+            <div class="scan-conf-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ── 2. Stats Band ─────────────────────────────────────────────────── -->
+<section class="stats-band">
+  <div class="stats-band-inner">
+    <div class="stat-block emerald-accent">
+      <div class="stat-num" data-count="99" data-suffix="%">0%</div>
+      <div class="stat-desc">Five-year survival rate when breast cancer is detected at the localised stage.</div>
+      <div class="stat-tag">Early Detection Outcome</div>
+    </div>
+    <div class="stat-block amber-accent">
+      <div class="stat-num" data-prefix="1 in " data-count="8" data-suffix="">1 in 0</div>
+      <div class="stat-desc">Women will develop breast cancer in their lifetime — making routine screening critical.</div>
+      <div class="stat-tag">Global Incidence</div>
+    </div>
+    <div class="stat-block coral-accent">
+      <div class="stat-num" data-count="45" data-suffix="k+">0k+</div>
+      <div class="stat-desc">Augmented mammogram images used to train and validate the DeepMammo model pipeline.</div>
+      <div class="stat-tag">Training Dataset</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── 3. How It Works ───────────────────────────────────────────────── -->
+<section class="how-section">
+  <div class="how-inner">
+    <span class="section-eyebrow">The Pipeline</span>
+    <h2 class="section-title">How DeepMammo Works</h2>
+    <p class="section-sub">From raw mammogram upload to a structured clinical PDF report in four precise steps.</p>
+
+    <div class="steps-flow">
+      <div class="step-cell">
+        <div class="step-badge">1</div>
+        <div class="step-name">Upload Scan</div>
+        <p class="step-desc">Submit a PNG or JPEG mammogram image via the API or Developer Playground. Supports images up to 20 MB.</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="step-cell">
+        <div class="step-badge">2</div>
+        <div class="step-name">Preprocess</div>
+        <p class="step-desc">CLAHE contrast enhancement, Otsu thresholding, and breast tissue isolation prepare the image for inference.</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="step-cell">
+        <div class="step-badge">3</div>
+        <div class="step-name">Deep Inference</div>
+        <p class="step-desc">EfficientNet-B4 encoder with FPN neck and CBAM attention simultaneously runs segmentation and dual classification.</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="step-cell">
+        <div class="step-badge">4</div>
+        <div class="step-name">Generate Report</div>
+        <p class="step-desc">A structured clinical report with findings, impression, therapy regimen, and patient handout is generated in seconds.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── 4. Model Bento ────────────────────────────────────────────────── -->
+<section class="bento-section">
+  <div class="bento-inner">
+    <div class="bento-header" style="margin-bottom:3rem;">
+      <span class="section-eyebrow">Model Architecture</span>
+      <h2 class="section-title" style="color:#fff;">Four Tasks. One Inference Pass.</h2>
+      <p class="section-sub" style="color:rgba(255,255,255,0.55);">DeepMammo solves detection, classification, segmentation, and reporting simultaneously using a shared EfficientNet-B4 backbone.</p>
+    </div>
+
+    <div class="bento-grid" id="bentoGrid">
+      <!-- Card 1 -->
+      <div class="bento-card">
+        <div class="bento-icon emerald-bg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+        <div class="bento-metric-badge">96.2% AUC</div>
+        <div class="bento-card-title">Abnormality Detection</div>
+        <p class="bento-card-desc">Identifies and classifies mammographic abnormalities as mass or calcification with high sensitivity. Multi-head classification output with calibrated probability scores.</p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="bento-card">
+        <div class="bento-icon navy-bg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        </div>
+        <div class="bento-metric-badge sky">94.7% Accuracy</div>
+        <div class="bento-card-title">Pathology Classification</div>
+        <p class="bento-card-desc">Distinguishes benign from malignant findings with calibrated confidence scores. Benign/malignant probability outputs guide clinical urgency triage decisions.</p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bento-card">
+        <div class="bento-icon amber-bg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF9F27" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l4.24 4.24"/></svg>
+        </div>
+        <div class="bento-metric-badge amber">0.78 Dice Score</div>
+        <div class="bento-card-title">Lesion Segmentation</div>
+        <p class="bento-card-desc">FPN decoder produces pixel-wise segmentation masks highlighting the abnormal region. Quantifies coverage percentage for area-based clinical interpretation.</p>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="bento-card">
+        <div class="bento-icon coral-bg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D85A30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="bento-metric-badge coral">Groq Llama-3.3-70B</div>
+        <div class="bento-card-title">Clinical Report Generation</div>
+        <p class="bento-card-desc">Groq-powered LLM generates a structured clinical narrative: findings, impression, therapy regimen, patient handout, and a downloadable PDF report.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── 5. Accuracy Block ──────────────────────────────────────────────── -->
+<section class="accuracy-section">
+  <div class="accuracy-inner">
+    <div class="accuracy-left">
+      <div class="accuracy-big-num">94.7<span>%</span></div>
+      <div class="accuracy-big-label">Pathology Accuracy</div>
+    </div>
+    <div class="accuracy-copy">
+      <span class="section-eyebrow">Model Performance</span>
+      <h2 class="section-title">Built for Clinical Precision</h2>
+      <p>DeepMammo's EfficientNet-B4 backbone with Feature Pyramid Network neck achieves 94.7% pathology accuracy and 96.2% abnormality AUC on a held-out validation set of augmented CBIS-DDSM images.</p>
+      <p>CBAM attention modules focus the model on clinically relevant mammographic regions, reducing false positive rates and improving segmentation specificity without additional inference overhead.</p>
+      <div class="peer-reviewed-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Peer-Reviewed Architecture
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── 6. CTA Band ────────────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2 class="cta-headline">Ready to analyse a mammogram?</h2>
+    <p class="cta-sub">Upload an image and receive a full AI analysis with segmentation, GradCAM saliency, and a complete clinical PDF report — in seconds.</p>
+
+    <a href="/dashboard" class="btn-hero-primary" style="font-size:1rem; padding:0.85rem 2rem;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+      Get Started Free
     </a>
-    <a href="/tutorial" class="btn btn-outline">How it works</a>
-  </div>
-</section>
 
-<!-- Medical relevance stats -->
-<section class="relevance">
-  <div class="relevance-inner">
-    <div class="stat-card">
-      <div class="stat-number">1 in 8</div>
-      <div class="stat-label">Women will develop breast cancer in their lifetime</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">99%</div>
-      <div class="stat-label">5-year survival rate when detected at the localised stage</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">45k+</div>
-      <div class="stat-label">Augmented mammogram images used to train DeepMammo</div>
+    <div class="cta-badge-row">
+      <span class="cta-badge">No login required</span>
+      <span class="cta-badge">REST API available</span>
+      <span class="cta-badge">PDF report included</span>
+      <span class="cta-badge">Open source</span>
     </div>
   </div>
 </section>
 
-<!-- How it works -->
-<section class="how-it-works">
-  <h2>How DeepMammo Works</h2>
-  <p class="sub">From image upload to clinical report in four steps</p>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <h3>Upload</h3>
-      <p>Upload a PNG or JPG mammogram image from your device.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <h3>Preprocess</h3>
-      <p>CLAHE enhancement, Otsu masking, and breast tissue isolation.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <h3>Analyse</h3>
-      <p>EfficientNet-B4 encoder with FPN neck runs simultaneous segmentation and classification.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <h3>Report</h3>
-      <p>Structured clinical report generated with findings, impression, and recommendation.</p>
-    </div>
-  </div>
-</section>
 
-<!-- CTA -->
-<section class="cta-banner">
-  <h2>Ready to analyse a mammogram?</h2>
-  <p>Upload an image and receive a full AI analysis report in seconds.</p>
-  <a href="/dashboard" class="btn btn-primary">Get Started &rarr;</a>
-</section>
+<!-- Count-up & bento animation script -->
+<script>
+(function() {
+  // ── Count-up on scroll ──────────────────────────────────────────
+  function animateCount(el) {
+    const target  = parseInt(el.getAttribute('data-count'), 10);
+    const prefix  = el.getAttribute('data-prefix') || '';
+    const suffix  = el.getAttribute('data-suffix') || '';
+    const duration = 1400;
+    const start    = performance.now();
+    function step(now) {
+      const pct = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - pct, 3); // ease-out cubic
+      const val  = Math.round(ease * target);
+      el.textContent = prefix + val + suffix;
+      if (pct < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  const countEls = document.querySelectorAll('[data-count]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        animateCount(e.target);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  countEls.forEach(el => observer.observe(el));
+
+  // ── Bento stagger fade-in ────────────────────────────────────────
+  const bentoCards = document.querySelectorAll('.bento-card');
+  const bentoObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        bentoObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  bentoCards.forEach(card => bentoObs.observe(card));
+})();
+</script>
 
 {% endblock %}
