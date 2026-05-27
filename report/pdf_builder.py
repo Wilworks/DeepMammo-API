@@ -200,22 +200,78 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     story.append(Spacer(1, 6))
 
     sections = clinical_report.get('sections', {})
-    section_order = [
-        ('clinical indication', 'Clinical Indication'),
-        ('technique',           'Technique'),
-        ('findings',            'Findings'),
-        ('impression',          'Impression'),
-        ('recommendation',      'Recommendation'),
-        ('disclaimer',          'Disclaimer'),
-        ('full_report',         'Report'),
-    ]
 
-    for key, display in section_order:
-        text = sections.get(key)
-        if text:
-            story.append(Paragraph(display, styles['subsection']))
-            story.append(Paragraph(_markdown_to_rl(text), styles['body']))
-            story.append(Spacer(1, 10))
+    # Referral Note / narrative sections (Clinical Indication → Disclaimer)
+    referral_note = clinical_report.get('referral_note', '')
+    if not referral_note:
+        # Build from flat sections as DermaDefect-style multiline block
+        section_order = [
+            ('clinical indication', 'Clinical Indication'),
+            ('technique',           'Technique'),
+            ('findings',            'Findings'),
+            ('impression',          'Impression'),
+            ('recommendation',      'Recommendation'),
+            ('disclaimer',          'Disclaimer'),
+            ('full_report',         'Report'),
+        ]
+        for key, display in section_order:
+            text = sections.get(key)
+            if text:
+                html_note = _markdown_to_rl(text)
+                story.append(Paragraph(display, styles['subsection']))
+                for part in html_note.split('<br/>'):
+                    if part.strip():
+                        story.append(Paragraph(part.strip(), styles['body']))
+                        story.append(Spacer(1, 4))
+                story.append(Spacer(1, 8))
+    else:
+        html_note = _markdown_to_rl(referral_note)
+        for part in html_note.split('<br/>'):
+            if part.strip():
+                story.append(Paragraph(part.strip(), styles['body']))
+                story.append(Spacer(1, 4))
+        story.append(Spacer(1, 12))
+
+    # Treatment Action Plan (DermaDefect: treatmentNotes bullet list)
+    treatment_notes = clinical_report.get('treatment_notes', [])
+    if treatment_notes:
+        story.append(Paragraph("Treatment Action Plan", styles['subsection']))
+        for note in treatment_notes:
+            story.append(Paragraph(f"• {note}", styles['body_bullet']))
+        story.append(Spacer(1, 8))
+
+    # Therapy Regimen (DermaDefect: therapyRegimen structured block)
+    regimen = clinical_report.get('therapy_regimen', {})
+    if regimen:
+        story.append(Paragraph("Prescribed Therapy Regimen", styles['subsection']))
+        story.append(Paragraph(f"<b>Medication:</b> {regimen.get('medication', 'N/A')}", styles['body']))
+        story.append(Paragraph(f"<b>Dosage:</b> {regimen.get('dosage', 'N/A')}", styles['body']))
+        story.append(Paragraph(f"<b>Duration:</b> {regimen.get('duration', 'N/A')}", styles['body']))
+        story.append(Paragraph(f"<b>Instructions:</b> {regimen.get('instructions', 'N/A')}", styles['body']))
+        story.append(Spacer(1, 8))
+
+    # Patient Handout — Do's and Don'ts (DermaDefect: patientHandout)
+    handout = clinical_report.get('patient_handout', {})
+    if handout:
+        story.append(Paragraph("Patient Handout", styles['subsection']))
+        dos   = handout.get('dos', [])
+        donts = handout.get('donts', [])
+        if dos:
+            story.append(Paragraph("<b>Do's:</b>", styles['body']))
+            for item in dos:
+                story.append(Paragraph(f"• {item}", styles['body_bullet']))
+        if donts:
+            story.append(Paragraph("<b>Don'ts:</b>", styles['body']))
+            for item in donts:
+                story.append(Paragraph(f"• {item}", styles['body_bullet']))
+        story.append(Spacer(1, 8))
+
+    # Recommended Action (DermaDefect: recommendedAction single sentence)
+    recommended_action = clinical_report.get('recommended_action', '')
+    if recommended_action:
+        story.append(Paragraph("Recommended Action", styles['subsection']))
+        story.append(Paragraph(recommended_action, styles['body']))
+        story.append(Spacer(1, 8))
 
     # ── Footer / Signature ─────────────────────────────────────────────
     story.append(Spacer(1, 12))
