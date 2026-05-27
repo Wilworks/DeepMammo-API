@@ -902,6 +902,8 @@ footer a:hover { color: var(--purple) !important; }
   padding: 2.5rem 2rem;
   border-right: 1px solid var(--border);
   overflow-y: auto;
+  min-height: 0;
+  height: 100%;
 }
 
 
@@ -912,6 +914,8 @@ footer a:hover { color: var(--purple) !important; }
   flex-direction: column;
   gap: 1.5rem;
   overflow-y: auto;
+  min-height: 0;
+  height: 100%;
 }
 
 @media (max-width: 1024px) {
