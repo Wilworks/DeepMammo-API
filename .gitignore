@@ -34,3 +34,8 @@ staticfiles/
 *.orig
 health_error.txt
 health_response.txt
+
+# Node
+node_modules/
+package-lock.json
+

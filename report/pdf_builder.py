@@ -17,17 +17,16 @@ from reportlab.platypus.flowables import HRFlowable
 MARGIN = 1.8 * cm
 
 # ── Colour palette ────────────────────────────────────────────────────
-PURPLE       = colors.HexColor('#534AB7')
-PURPLE_LIGHT = colors.HexColor('#EEEDFE')
-PURPLE_DARK  = colors.HexColor('#3d3690')
-DARK         = colors.HexColor('#1a1a2e')
-GRAY         = colors.HexColor('#6c757d')
-LIGHT_GRAY   = colors.HexColor('#f8f7fe')
+PURPLE       = colors.HexColor('#082F49') # Maps to Deep Navy
+PURPLE_LIGHT = colors.HexColor('#F1F5F9') # Slate Light Accent
+PURPLE_DARK  = colors.HexColor('#0A1628') # Dark Navy Accent
+GRAY         = colors.HexColor('#64748B')
+LIGHT_GRAY   = colors.HexColor('#F8FAFC')
 WHITE        = colors.white
-SUCCESS      = colors.HexColor('#2e7d32')
-DANGER       = colors.HexColor('#c62828')
-WARNING      = colors.HexColor('#e65100')
-INFO         = colors.HexColor('#1565c0')
+SUCCESS      = colors.HexColor('#10B981') # Emerald
+DANGER       = colors.HexColor('#D85A30') # Coral/Rose
+WARNING      = colors.HexColor('#EF9F27') # Amber
+INFO         = colors.HexColor('#082F49')
 
 
 def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
@@ -72,11 +71,15 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     # ── 5. Clinical report ───────────────────────────────────────────
     story += _clinical_report_section(styles, clinical_report)
 
+    # ── 5.5. Attending Signature Stamp Box ───────────────────────────
+    story += _signature_block(styles)
+
     # ── 6. Footer ────────────────────────────────────────────────────
     story += _footer(styles, clinical_report)
 
     doc.build(story)
     return base64.b64encode(buf.getvalue()).decode('utf-8')
+
 
 
 # ── Section builders ──────────────────────────────────────────────────
@@ -297,8 +300,33 @@ def _clinical_report_section(styles, clinical_report):
     return items
 
 
+def _signature_block(styles):
+    sig_table = Table(
+        [[
+            Paragraph("<b>Attending Reviewer Signature:</b>", styles['info_label']),
+            Paragraph("<b>Diagnostic stamp:</b>", styles['info_label'])
+        ],
+        [
+            Paragraph("<br/><br/>________________________________________<br/>Clinical Analyst, MD", styles['info_value']),
+            Paragraph("<br/><br/>[ ONLINE SYSTEM VERIFICATION STAMP ]", styles['info_value'])
+        ]],
+        colWidths=[10*cm, 7.4*cm]
+    )
+    sig_table.setStyle(TableStyle([
+        ('BOX',           (0,0), (-1,-1), 0.5, colors.HexColor('#E2E8F0')),
+        ('BACKGROUND',    (0,0), (-1,-1), LIGHT_GRAY),
+        ('TOPPADDING',    (0,0), (-1,-1), 10),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+        ('LEFTPADDING',   (0,0), (-1,-1), 12),
+        ('RIGHTPADDING',  (-1,0), (-1,-1), 12),
+        ('LINEBELOW',     (0,0), (-1,0), 0.5, colors.HexColor('#E2E8F0')),
+    ]))
+    return [Spacer(1, 10), sig_table, Spacer(1, 10)]
+
+
 def _footer(styles, clinical_report):
     items = []
+
     items.append(Spacer(1, 8))
     items.append(HRFlowable(width="100%", thickness=0.5, color=GRAY))
 
