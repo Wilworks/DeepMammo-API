@@ -11,10 +11,22 @@ from reportlab.platypus import (
     HRFlowable, KeepTogether
 )
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY, TA_RIGHT
+import re
+import qrcode
 from reportlab.platypus.flowables import HRFlowable
 
 
 MARGIN = 1.8 * cm
+
+def _markdown_to_rl(text: str) -> str:
+    """Very basic markdown to ReportLab HTML conversion."""
+    if not text:
+        return ""
+    # Convert **bold** to <b>bold</b>
+    text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+    # Convert newlines
+    text = text.replace('\n', '<br/>')
+    return text
 
 # ── Colour palette ────────────────────────────────────────────────────
 PURPLE       = colors.HexColor('#082F49') # Maps to Deep Navy
@@ -56,6 +68,7 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     abn     = predictions['abnormality']
     path    = predictions['pathology']
     seg     = predictions['segmentation']
+    case_id = patient.get('patient_id') or datetime.utcnow().strftime('DM-%Y%m%d-%H%M%S')
 
     # ── 1. Header bar ────────────────────────────────────────────────
     story += _header(styles, patient)
@@ -74,7 +87,7 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     story += _clinical_report_section(styles, clinical_report)
 
     # ── 5.5. Attending Signature Stamp Box ───────────────────────────
-    story += _signature_block(styles)
+    story += _signature_block(styles, patient, case_id)
 
     # ── 6. Footer ────────────────────────────────────────────────────
     story += _footer(styles, clinical_report)
@@ -294,7 +307,7 @@ def _clinical_report_section(styles, clinical_report):
                     ])
                 ),
                 Spacer(1, 3),
-                Paragraph(text, styles['body']),
+                Paragraph(_markdown_to_rl(text), styles['body']),
                 Spacer(1, 10),
             ])
             items.append(block)
@@ -302,26 +315,43 @@ def _clinical_report_section(styles, clinical_report):
     return items
 
 
-def _signature_block(styles):
-    sig_table = Table(
-        [[
-            Paragraph("<b>Attending Reviewer Signature:</b>", styles['info_label']),
-            Paragraph("<b>Diagnostic stamp:</b>", styles['info_label'])
-        ],
-        [
-            Paragraph("<br/><br/>________________________________________<br/>Clinical Analyst, MD", styles['info_value']),
-            Paragraph("<br/><br/>[ ONLINE SYSTEM VERIFICATION STAMP ]", styles['info_value'])
-        ]],
-        colWidths=[10*cm, 7.4*cm]
+def _signature_block(styles, patient, case_id):
+    # Generate QR Code
+    qr = qrcode.QRCode(box_size=3, border=1)
+    qr.add_data(f"https://secure.deepmammo.app/verify/{case_id}")
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+    
+    qr_buf = io.BytesIO()
+    qr_img.save(qr_buf, format="PNG")
+    qr_buf.seek(0)
+    rl_qr = RLImage(qr_buf, width=2.2*cm, height=2.2*cm)
+    
+    reviewer_name = patient.get('referring_physician') or 'Attending Reviewer, MD'
+    
+    sig_cell = Paragraph(
+        f"<font color='#64748B' size=8><i>Digital Verified Signature</i></font><br/><br/>"
+        f"<font size=12 color='#0A1628'><b>{reviewer_name}</b></font><br/>"
+        f"<font color='#64748B'>________________________________________</font>",
+        styles['body']
     )
+    
+    qr_text = Paragraph(
+        "<font size=7 color='#64748B'><b>Verify on<br/>DeepMammo Secure<br/>Web Cloud</b></font>",
+        styles['body']
+    )
+    
+    sig_table = Table([[sig_cell, rl_qr, qr_text]], colWidths=[10*cm, 2.7*cm, 4.7*cm])
     sig_table.setStyle(TableStyle([
+        ('ALIGN', (0,0), (0,0), 'LEFT'),
+        ('ALIGN', (1,0), (2,0), 'RIGHT'),
+        ('VALIGN', (0,0), (-1,-1), 'BOTTOM'),
         ('BOX',           (0,0), (-1,-1), 0.5, colors.HexColor('#E2E8F0')),
         ('BACKGROUND',    (0,0), (-1,-1), LIGHT_GRAY),
         ('TOPPADDING',    (0,0), (-1,-1), 10),
         ('BOTTOMPADDING', (0,0), (-1,-1), 10),
         ('LEFTPADDING',   (0,0), (-1,-1), 12),
         ('RIGHTPADDING',  (-1,0), (-1,-1), 12),
-        ('LINEBELOW',     (0,0), (-1,0), 0.5, colors.HexColor('#E2E8F0')),
     ]))
     return [Spacer(1, 10), sig_table, Spacer(1, 10)]
 
