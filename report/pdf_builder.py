@@ -20,8 +20,10 @@ MARGIN = 1.8 * cm
 PURPLE       = colors.HexColor('#082F49') # Maps to Deep Navy
 PURPLE_LIGHT = colors.HexColor('#F1F5F9') # Slate Light Accent
 PURPLE_DARK  = colors.HexColor('#0A1628') # Dark Navy Accent
+DARK         = PURPLE_DARK
 GRAY         = colors.HexColor('#64748B')
 LIGHT_GRAY   = colors.HexColor('#F8FAFC')
+
 WHITE        = colors.white
 SUCCESS      = colors.HexColor('#10B981') # Emerald
 DANGER       = colors.HexColor('#D85A30') # Coral/Rose
