@@ -129,40 +129,70 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     story.append(Paragraph("Visual Analysis", styles['section']))
     story.append(Spacer(1, 6))
 
-    img_row = []
-    img_labels = []
+    # Primary 2-up: Original Scan + AI Saliency Map (matching DermaDefect pattern)
+    primary_row    = []
+    primary_labels = []
 
     for key, label in [
-        ('mask_b64',    'Segmentation Mask'),
-        ('overlay_b64', 'Mask Overlay'),
-        ('gradcam_b64', 'AI Saliency Map'),
+        ('original_b64', 'Original Mammography Scan'),
+        ('gradcam_b64',  'AI Saliency Map'),
     ]:
         b64 = images.get(key)
         if b64:
-            # Strip scheme if present
             if b64.startswith("data:"):
                 b64 = b64.split(",")[1]
             try:
                 img_buf = io.BytesIO(base64.b64decode(b64))
-                rl_img  = RLImage(img_buf, width=5*cm, height=5*cm)
-                img_row.append(rl_img)
-                img_labels.append(label)
+                rl_img  = RLImage(img_buf, width=6*cm, height=6*cm)
+                primary_row.append(rl_img)
+                primary_labels.append(label)
             except Exception:
                 pass
 
-    if img_row:
-        n = len(img_row)
-        col_w = 5.5 * cm
+    if primary_row:
         img_table = Table(
-            [img_row, [Paragraph(l, styles['img_label']) for l in img_labels]],
-            colWidths=[col_w] * n
+            [primary_row, [Paragraph(l, styles['img_label']) for l in primary_labels]],
+            colWidths=[6.5*cm] * len(primary_row)
         )
         img_table.setStyle(TableStyle([
             ('ALIGN',  (0,0), (-1,-1), 'CENTER'),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ]))
         story.append(img_table)
+        story.append(Spacer(1, 10))
+
+    # Secondary strip: Segmentation Mask + Overlay
+    secondary_row    = []
+    secondary_labels = []
+
+    for key, label in [
+        ('mask_b64',    'Segmentation Mask'),
+        ('overlay_b64', 'Mask Overlay'),
+    ]:
+        b64 = images.get(key)
+        if b64:
+            if b64.startswith("data:"):
+                b64 = b64.split(",")[1]
+            try:
+                img_buf = io.BytesIO(base64.b64decode(b64))
+                rl_img  = RLImage(img_buf, width=4.5*cm, height=4.5*cm)
+                secondary_row.append(rl_img)
+                secondary_labels.append(label)
+            except Exception:
+                pass
+
+    if secondary_row:
+        sec_table = Table(
+            [secondary_row, [Paragraph(l, styles['img_label']) for l in secondary_labels]],
+            colWidths=[5*cm] * len(secondary_row)
+        )
+        sec_table.setStyle(TableStyle([
+            ('ALIGN',  (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ]))
+        story.append(sec_table)
         story.append(Spacer(1, 16))
+
 
     # ── Clinical report sections ──────────────────────────────────────
     story.append(HRFlowable(width="100%", thickness=0.5, color=GRAY, spaceAfter=8))

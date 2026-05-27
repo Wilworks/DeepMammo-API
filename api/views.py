@@ -53,6 +53,7 @@ class PredictView(APIView):
             clinical_report         = generate_clinical_report(predictions, patient_info)
 
             images = {
+                'original_b64': predictions['segmentation'].get('overlay_b64') or predictions['segmentation'].get('mask_b64'),
                 'mask_b64':    predictions['segmentation']['mask_b64'],
                 'overlay_b64': predictions['segmentation']['overlay_b64'],
                 'gradcam_b64': gradcam_b64,
