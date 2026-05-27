@@ -75,6 +75,58 @@
 .form-group textarea { resize:vertical; min-height:60px; }
 .modal-actions { display:flex; gap:.75rem; justify-content:flex-end; margin-top:1.25rem; }
 .modal-note { font-size:.75rem; color:var(--text-light); margin-top:1rem; font-style:italic; }
+
+/* ── PDF Preview modal ─────────────────────────────────────────── */
+.pdf-preview-overlay {
+  position:fixed; inset:0;
+  background:rgba(8,47,73,0.82);
+  backdrop-filter:blur(6px);
+  z-index:300;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-start;
+  padding:0;
+}
+.pdf-preview-topbar {
+  width:100%; background:var(--brand-navy);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0.75rem 1.5rem;
+  box-shadow:0 2px 16px rgba(0,0,0,0.35);
+  flex-shrink:0;
+}
+.pdf-preview-topbar .pdf-title {
+  font-size:0.92rem; font-weight:700; color:#fff;
+  letter-spacing:0.02em;
+}
+.pdf-preview-topbar .pdf-title span {
+  font-weight:400; color:rgba(255,255,255,0.55); margin-left:6px;
+}
+.pdf-preview-actions { display:flex; gap:0.6rem; align-items:center; }
+.btn-pdf-download {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--emerald); color:#fff;
+  border:none; border-radius:8px;
+  padding:0.48rem 1.1rem; font-size:0.85rem; font-weight:700;
+  cursor:pointer; transition:opacity .2s, transform .15s;
+  letter-spacing:0.01em;
+}
+.btn-pdf-download:hover { opacity:0.9; transform:translateY(-1px); }
+.btn-pdf-close {
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(255,255,255,0.1); color:#fff;
+  border:1px solid rgba(255,255,255,0.2); border-radius:8px;
+  padding:0.48rem 1.0rem; font-size:0.85rem; font-weight:600;
+  cursor:pointer; transition:background .2s;
+  letter-spacing:0.01em;
+}
+.btn-pdf-close:hover { background:rgba(255,255,255,0.18); }
+.pdf-iframe-wrap {
+  flex:1; width:100%; display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.pdf-iframe-wrap iframe {
+  width:100%; height:100%; border:none; flex:1;
+  background:#525659;
+}
 </style>
 {% endblock %}
 
@@ -310,9 +362,18 @@
       <div class="download-bar">
         <div>
           <strong>Full Report Ready</strong>
-          <p style="font-size:.8rem; margin-top:2px;">Download PDF report directly.</p>
+          <p style="font-size:.8rem; margin-top:2px;">Preview and personalise your PDF clinical report before downloading.</p>
         </div>
-        <button class="btn btn-primary" id="downloadBtn">&#8595;&nbsp;Download PDF</button>
+        <div style="display:flex;gap:0.6rem;align-items:center;">
+          <button class="btn btn-outline" id="previewQuickBtn" style="display:inline-flex;align-items:center;gap:5px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            Preview
+          </button>
+          <button class="btn btn-primary" id="downloadBtn" style="display:inline-flex;align-items:center;gap:5px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            Download PDF
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -629,12 +690,38 @@
       <textarea id="clinicalNotes" placeholder="e.g. Screening mammogram, no prior history"></textarea>
     </div>
 
-    <p class="modal-note">You may skip this and click "Skip &amp; Download" to generate a report without patient details.</p>
+    <p class="modal-note">You may skip this and click "Skip &amp; Preview" to view the report without patient details.</p>
 
     <div class="modal-actions">
-      <button class="btn btn-outline" id="skipBtn">Skip &amp; Download</button>
-      <button class="btn btn-primary" id="confirmBtn">Generate &amp; Download</button>
+      <button class="btn btn-outline" id="skipBtn">Skip &amp; Preview</button>
+      <button class="btn btn-primary" id="confirmBtn" style="display:inline-flex;align-items:center;gap:6px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        Generate &amp; Preview
+      </button>
     </div>
+  </div>
+</div>
+
+<!-- ── PDF Preview overlay ──────────────────────────────────────────── -->
+<div class="pdf-preview-overlay hidden" id="pdfPreviewOverlay">
+  <div class="pdf-preview-topbar">
+    <div class="pdf-title">
+      DeepMammo Clinical Report
+      <span>— Preview before download</span>
+    </div>
+    <div class="pdf-preview-actions">
+      <button class="btn-pdf-download" id="btnDownloadFromPreview">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+        Download PDF
+      </button>
+      <button class="btn-pdf-close" id="btnClosePreview">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+        Close
+      </button>
+    </div>
+  </div>
+  <div class="pdf-iframe-wrap">
+    <iframe id="pdfPreviewIframe" title="PDF Report Preview"></iframe>
   </div>
 </div>
 {% endblock %}

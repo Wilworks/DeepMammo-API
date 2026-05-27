@@ -48,8 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultsEl  = document.getElementById('resultsSection') as HTMLDivElement | null;
   const errorBox   = document.getElementById('errorBox') as HTMLDivElement | null;
   const downloadBtn= document.getElementById('downloadBtn') as HTMLButtonElement | null;
+  const previewQuickBtn = document.getElementById('previewQuickBtn') as HTMLButtonElement | null;
   const modalOverlay=document.getElementById('modalOverlay') as HTMLDivElement | null;
   const jsonOutput = document.getElementById('jsonOutput') as HTMLElement | null;
+  const pdfPreviewOverlay = document.getElementById('pdfPreviewOverlay') as HTMLDivElement | null;
+  const pdfPreviewIframe = document.getElementById('pdfPreviewIframe') as HTMLIFrameElement | null;
+  const btnDownloadFromPreview = document.getElementById('btnDownloadFromPreview') as HTMLButtonElement | null;
+  const btnClosePreview = document.getElementById('btnClosePreview') as HTMLButtonElement | null;
 
   // Form controls inputs
   const modelSelect     = document.getElementById('modelSelect') as HTMLSelectElement | null;
@@ -439,7 +444,8 @@ document.addEventListener('DOMContentLoaded', () => {
     resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ── Download Report Modal ─────────────────────────────────────────
+  // ── Download / Preview Report Modal ──────────────────────────────
+  // "Download PDF" button → opens patient info modal first
   downloadBtn.addEventListener('click', () => {
     const examDate = document.getElementById('examDate') as HTMLInputElement | null;
     if (examDate) {
@@ -448,14 +454,23 @@ document.addEventListener('DOMContentLoaded', () => {
     modalOverlay.classList.remove('hidden');
   });
 
+  // "Preview" quick button → open preview immediately with current PDF
+  if (previewQuickBtn) {
+    previewQuickBtn.addEventListener('click', () => {
+      if (pdfB64) openPdfPreview(pdfB64);
+    });
+  }
+
+  // "Skip & Preview" → show current PDF in preview without regenerating
   const skipBtn = document.getElementById('skipBtn');
   if (skipBtn) {
     skipBtn.addEventListener('click', () => {
       modalOverlay.classList.add('hidden');
-      if (pdfB64) triggerDownload(pdfB64);
+      if (pdfB64) openPdfPreview(pdfB64);
     });
   }
 
+  // "Generate & Preview" → rebuild PDF with patient info then preview it
   const confirmBtn = document.getElementById('confirmBtn');
   if (confirmBtn) {
     confirmBtn.addEventListener('click', async () => {
@@ -477,28 +492,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const hasData = Object.values(patientInfo).some(v => v);
       if (!hasData) {
-        if (pdfB64) triggerDownload(pdfB64);
+        if (pdfB64) openPdfPreview(pdfB64);
         return;
       }
 
-      // Rebuild PDF with custom metadata
+      // Rebuild PDF with custom patient metadata
       const formData = new FormData();
       if (selectedFile) {
         formData.append('image', selectedFile);
       }
       formData.append('patient_info', JSON.stringify(patientInfo));
 
+      // Show a lightweight in-bar loading state
+      const confirmBtnEl = document.getElementById('confirmBtn') as HTMLButtonElement | null;
+      if (confirmBtnEl) { confirmBtnEl.disabled = true; confirmBtnEl.textContent = 'Building…'; }
+
       try {
         const res = await fetch('/api/predict/', { method: 'POST', body: formData });
         const data = await res.json();
         if (res.ok && data.pdf_b64) {
-          triggerDownload(data.pdf_b64);
+          pdfB64 = data.pdf_b64; // update cached copy
+          openPdfPreview(data.pdf_b64);
         } else {
           console.warn("Could not regenerate report. Falling back to default PDF.");
-          if (pdfB64) triggerDownload(pdfB64);
+          if (pdfB64) openPdfPreview(pdfB64);
         }
       } catch {
-        if (pdfB64) triggerDownload(pdfB64);
+        if (pdfB64) openPdfPreview(pdfB64);
+      } finally {
+        if (confirmBtnEl) { confirmBtnEl.disabled = false; confirmBtnEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Generate &amp; Preview'; }
       }
     });
   }
@@ -507,6 +529,16 @@ document.addEventListener('DOMContentLoaded', () => {
   modalOverlay.addEventListener('click', (e) => {
     if (e.target === modalOverlay) modalOverlay.classList.add('hidden');
   });
+
+  // PDF preview overlay controls
+  if (btnClosePreview) {
+    btnClosePreview.addEventListener('click', () => closePdfPreview());
+  }
+  if (btnDownloadFromPreview) {
+    btnDownloadFromPreview.addEventListener('click', () => {
+      if (pdfB64) triggerDownload(pdfB64);
+    });
+  }
 
   function triggerDownload(b64: string) {
     if (!b64) return;
@@ -522,6 +554,35 @@ document.addEventListener('DOMContentLoaded', () => {
     link.download = 'deepmammo_report.pdf';
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  // ── PDF Preview Helper ────────────────────────────────────────────
+  let currentPreviewBlobUrl: string | null = null;
+
+  function openPdfPreview(b64: string) {
+    if (!b64 || !pdfPreviewOverlay || !pdfPreviewIframe) return;
+    // Revoke previous blob URL to avoid memory leaks
+    if (currentPreviewBlobUrl) {
+      URL.revokeObjectURL(currentPreviewBlobUrl);
+      currentPreviewBlobUrl = null;
+    }
+    const bytes = atob(b64);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    const blob = new Blob([arr], { type: 'application/pdf' });
+    currentPreviewBlobUrl = URL.createObjectURL(blob);
+    pdfPreviewIframe.src = currentPreviewBlobUrl;
+    pdfPreviewOverlay.classList.remove('hidden');
+  }
+
+  function closePdfPreview() {
+    if (!pdfPreviewOverlay || !pdfPreviewIframe) return;
+    pdfPreviewOverlay.classList.add('hidden');
+    pdfPreviewIframe.src = '';
+    if (currentPreviewBlobUrl) {
+      URL.revokeObjectURL(currentPreviewBlobUrl);
+      currentPreviewBlobUrl = null;
+    }
   }
 
   // ── Reset Interactive Playground ──────────────────────────────────
