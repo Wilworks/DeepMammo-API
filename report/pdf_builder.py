@@ -286,14 +286,14 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     qr_buf = io.BytesIO()
     qr_img.save(qr_buf, format="PNG")
     qr_buf.seek(0)
-    rl_qr = RLImage(qr_buf, width=2.2*cm, height=2.2*cm)
+    rl_qr = RLImage(qr_buf, width=2.5*cm, height=2.5*cm)
     
     reviewer_name = patient.get('referring_physician') or 'Attending Reviewer, MD'
     
     sig_cell = Paragraph(
         f"<font color='#64748B' size=8><i>Digital Verified Signature</i></font><br/><br/>"
-        f"<font size=12 color='#0A1628'><b>{reviewer_name}</b></font><br/>"
-        f"<font color='#64748B'>________________________________________</font>",
+        f"<font size=14 color='#0A1628'><b>{reviewer_name}</b></font><br/>"
+        f"<font color='#0A1628'>________________________</font>",
         styles['body']
     )
     
@@ -302,17 +302,11 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
         styles['body']
     )
     
-    sig_table = Table([[sig_cell, rl_qr, qr_text]], colWidths=[10*cm, 2.7*cm, 4.7*cm])
+    sig_table = Table([[sig_cell, rl_qr, qr_text]], colWidths=[10*cm, 3*cm, 3.5*cm])
     sig_table.setStyle(TableStyle([
-        ('ALIGN', (0,0), (0,0), 'LEFT'),
-        ('ALIGN', (1,0), (2,0), 'RIGHT'),
+        ('ALIGN',  (0,0), (0,0), 'LEFT'),
+        ('ALIGN',  (1,0), (2,0), 'RIGHT'),
         ('VALIGN', (0,0), (-1,-1), 'BOTTOM'),
-        ('BOX',           (0,0), (-1,-1), 0.5, colors.HexColor('#E2E8F0')),
-        ('BACKGROUND',    (0,0), (-1,-1), LIGHT_BLUE),
-        ('TOPPADDING',    (0,0), (-1,-1), 10),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 10),
-        ('LEFTPADDING',   (0,0), (-1,-1), 12),
-        ('RIGHTPADDING',  (-1,0), (-1,-1), 12),
     ]))
     story.append(sig_table)
     
