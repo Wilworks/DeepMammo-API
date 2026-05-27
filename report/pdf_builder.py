@@ -1,22 +1,33 @@
 import io
 import base64
+import re
 from datetime import datetime
+import qrcode
+
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer,
-    Table, TableStyle, Image as RLImage,
-    HRFlowable, KeepTogether
+    Table, TableStyle, Image as RLImage, HRFlowable
 )
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY, TA_RIGHT
-import re
-import qrcode
-from reportlab.platypus.flowables import HRFlowable
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 
+PAGE_W, PAGE_H = A4
+MARGIN = 2 * cm
 
-MARGIN = 1.8 * cm
+# DeepMammo Clinical Tech Branding Colors (Navy Accent Match)
+PURPLE       = colors.HexColor('#082F49') # Primary Navy
+LIGHT_BLUE   = colors.HexColor('#F1F5F9') # Slate Light Accent
+DARK         = colors.HexColor('#0A1628') # Dark Navy Accent
+GRAY         = colors.HexColor('#64748B') # Neutral Slate
+LIGHT_GRAY   = colors.HexColor('#F8FAFC') # Subtle Border Canvas
+
+SUCCESS      = colors.HexColor('#10B981') # Emerald
+DANGER       = colors.HexColor('#D85A30') # Coral/Rose
+WARNING      = colors.HexColor('#EF9F27') # Amber
+
 
 def _markdown_to_rl(text: str) -> str:
     """Very basic markdown to ReportLab HTML conversion."""
@@ -28,257 +39,138 @@ def _markdown_to_rl(text: str) -> str:
     text = text.replace('\n', '<br/>')
     return text
 
-# ── Colour palette ────────────────────────────────────────────────────
-PURPLE       = colors.HexColor('#082F49') # Maps to Deep Navy
-PURPLE_LIGHT = colors.HexColor('#F1F5F9') # Slate Light Accent
-PURPLE_DARK  = colors.HexColor('#0A1628') # Dark Navy Accent
-DARK         = PURPLE_DARK
-GRAY         = colors.HexColor('#64748B')
-LIGHT_GRAY   = colors.HexColor('#F8FAFC')
-
-WHITE        = colors.white
-SUCCESS      = colors.HexColor('#10B981') # Emerald
-DANGER       = colors.HexColor('#D85A30') # Coral/Rose
-WARNING      = colors.HexColor('#EF9F27') # Amber
-INFO         = colors.HexColor('#082F49')
-
 
 def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     """
-    Builds a professional clinical PDF report.
-
-    Args:
-        predictions    : postprocess() output dict
-        clinical_report: groq_client output dict (includes patient_info)
-        images         : dict — mask_b64, overlay_b64, gradcam_b64
-
-    Returns:
-        base64-encoded PDF string
+    Builds a professional clinical PDF report matching the DermaDefect layout structure.
+    Returns base64-encoded PDF string.
     """
-    buf  = io.BytesIO()
-    doc  = SimpleDocTemplate(
-        buf, pagesize=A4,
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=A4,
         leftMargin=MARGIN, rightMargin=MARGIN,
-        topMargin=1.2*cm, bottomMargin=1.5*cm,
+        topMargin=MARGIN,  bottomMargin=MARGIN,
     )
 
-    styles  = _build_styles()
-    story   = []
+    styles = _build_styles()
+    story  = []
+
     patient = clinical_report.get('patient_info', {})
     abn     = predictions['abnormality']
     path    = predictions['pathology']
     seg     = predictions['segmentation']
     case_id = patient.get('patient_id') or datetime.utcnow().strftime('DM-%Y%m%d-%H%M%S')
 
-    # ── 1. Header bar ────────────────────────────────────────────────
-    story += _header(styles, patient)
+    # ── Header ──────────────────────────────────────────────────────
+    story.append(Paragraph("DeepMammo", styles['title']))
+    story.append(Paragraph("AI-Assisted Mammography Analysis Report", styles['subtitle']))
+    story.append(Paragraph(
+        f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')} | Case ID: {case_id}",
+        styles['meta']
+    ))
+    story.append(HRFlowable(width="100%", thickness=1, color=PURPLE, spaceAfter=12))
 
-    # ── 2. Patient info block ────────────────────────────────────────
-    if any(patient.values()):
-        story += _patient_block(styles, patient)
+    # ── Patient Context ──────────────────────────────────────────────
+    p_name = patient.get('patient_name') or 'Unknown Patient'
+    p_id   = patient.get('patient_id') or 'N/A'
+    p_physician = patient.get('referring_physician') or 'N/A'
+    story.append(Paragraph(
+        f"<b>Patient:</b> {p_name} &nbsp;|&nbsp; <b>Patient ID:</b> {p_id} &nbsp;|&nbsp; <b>Referring Physician:</b> {p_physician}",
+        styles['body']
+    ))
+    story.append(Spacer(1, 12))
 
-    # ── 3. Prediction summary ────────────────────────────────────────
-    story += _prediction_table(styles, abn, path, seg)
-
-    # ── 4. Visual analysis ───────────────────────────────────────────
-    story += _image_section(styles, images)
-
-    # ── 5. Clinical report ───────────────────────────────────────────
-    story += _clinical_report_section(styles, clinical_report)
-
-    # ── 5.5. Attending Signature Stamp Box ───────────────────────────
-    story += _signature_block(styles, patient, case_id)
-
-    # ── 6. Footer ────────────────────────────────────────────────────
-    story += _footer(styles, clinical_report)
-
-    doc.build(story)
-    return base64.b64encode(buf.getvalue()).decode('utf-8')
-
-
-
-# ── Section builders ──────────────────────────────────────────────────
-
-def _header(styles, patient):
-    date_str = datetime.utcnow().strftime('%B %d, %Y  %H:%M UTC')
-
-    # Two-column header: brand left, date right
-    header_table = Table(
-        [[
-            Paragraph("<b>DeepMammo</b>", styles['brand']),
-            Paragraph(f"Report Date: {date_str}", styles['header_date']),
-        ]],
-        colWidths=['60%', '40%'],
-    )
-    header_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1), PURPLE),
-        ('VALIGN',     (0,0), (-1,-1), 'MIDDLE'),
-        ('TOPPADDING', (0,0), (-1,-1), 12),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 12),
-        ('LEFTPADDING',  (0,0), (0,-1), 16),
-        ('RIGHTPADDING', (-1,0), (-1,-1), 16),
-    ]))
-
-    subtitle = Paragraph(
-        "AI-Assisted Mammography Analysis Report",
-        styles['header_sub']
-    )
-
-    return [header_table, subtitle, Spacer(1, 14)]
-
-
-def _patient_block(styles, patient):
-    items = []
-
-    rows = [
-        ['Patient Name',       patient.get('patient_name', '—')],
-        ['Patient ID',         patient.get('patient_id', '—')],
-        ['Referring Physician',patient.get('referring_physician', '—')],
-        ['Examination Date',   patient.get('exam_date', '—')],
-    ]
-    if patient.get('clinical_notes'):
-        rows.append(['Clinical Notes', patient['clinical_notes']])
-
-    # Build two-per-row layout
-    flat = []
-    for i in range(0, len(rows), 2):
-        left  = rows[i]
-        right = rows[i+1] if i+1 < len(rows) else ['', '']
-        flat.append([
-            Paragraph(left[0],  styles['info_label']),
-            Paragraph(left[1],  styles['info_value']),
-            Paragraph(right[0], styles['info_label']),
-            Paragraph(right[1], styles['info_value']),
-        ])
-
-    pt = Table(flat, colWidths=[3.5*cm, 6*cm, 3.5*cm, 6*cm])
-    pt.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1), LIGHT_GRAY),
-        ('GRID',       (0,0), (-1,-1), 0.3, colors.HexColor('#e2e0f5')),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-        ('LEFTPADDING',  (0,0), (-1,-1), 8),
-        ('VALIGN',     (0,0), (-1,-1), 'MIDDLE'),
-    ]))
-
-    items.append(Paragraph("Patient Information", styles['section']))
-    items.append(Spacer(1, 5))
-    items.append(pt)
-    items.append(Spacer(1, 14))
-    return items
-
-
-def _prediction_table(styles, abn, path, seg):
-    items = []
-    items.append(Paragraph("AI Prediction Summary", styles['section']))
-    items.append(Spacer(1, 5))
-
-    def conf_color(c):
-        if c >= 0.85: return SUCCESS
-        if c >= 0.70: return WARNING
-        return DANGER
+    # ── Prediction summary table ─────────────────────────────────────
+    story.append(Paragraph("AI Prediction Summary", styles['section']))
+    story.append(Spacer(1, 6))
 
     def conf_label(c):
-        if c >= 0.85: return "High"
-        if c >= 0.70: return "Moderate"
-        return "Borderline"
+        if c >= 0.85: return "HIGH"
+        if c >= 0.70: return "MODERATE"
+        return "BORDERLINE"
 
-    # Header row
-    data = [[
-        Paragraph('Finding',    styles['th']),
-        Paragraph('Result',     styles['th']),
-        Paragraph('Confidence', styles['th']),
-        Paragraph('Level',      styles['th']),
-    ]]
+    summary_data = [
+        ['Finding', 'Result Type', 'Confidence', 'Triage Level'],
+        [
+            'Abnormality Type', 
+            abn['label'].title(), 
+            f"{abn['confidence']*100:.1f}%", 
+            conf_label(abn['confidence'])
+        ],
+        [
+            'Pathology', 
+            path['label'].title(), 
+            f"{path['confidence']*100:.1f}%", 
+            conf_label(path['confidence'])
+        ],
+        [
+            'Region Coverage',
+            f"{seg['coverage_pct']:.2f}% of image",
+            '—',
+            'SEGMENTATION'
+        ]
+    ]
 
-    # Abnormality row
-    data.append([
-        Paragraph('Abnormality Type', styles['td']),
-        Paragraph(f"<b>{abn['label'].title()}</b>", styles['td']),
-        Paragraph(f"{abn['confidence']*100:.1f}%", styles['td_center']),
-        Paragraph(conf_label(abn['confidence']), styles['td_center']),
-    ])
-
-    # Pathology row
-    path_color = DANGER if path['label'] == 'malignant' else SUCCESS
-    data.append([
-        Paragraph('Pathology', styles['td']),
-        Paragraph(f"<b><font color='#{path_color.hexval()[2:]}'>{path['label'].title()}</font></b>", styles['td']),
-        Paragraph(f"{path['confidence']*100:.1f}%", styles['td_center']),
-        Paragraph(conf_label(path['confidence']), styles['td_center']),
-    ])
-
-    # Segmentation row
-    data.append([
-        Paragraph('Region Coverage', styles['td']),
-        Paragraph(f"{seg['coverage_pct']:.2f}% of image", styles['td']),
-        Paragraph('—', styles['td_center']),
-        Paragraph('Segmentation', styles['td_center']),
-    ])
-
-    t = Table(data, colWidths=[4.5*cm, 5*cm, 3.5*cm, 3.5*cm])
-    t.setStyle(TableStyle([
-        ('BACKGROUND',    (0,0), (-1,0), PURPLE),
-        ('TEXTCOLOR',     (0,0), (-1,0), WHITE),
-        ('ROWBACKGROUNDS',(0,1), (-1,-1), [WHITE, PURPLE_LIGHT]),
-        ('GRID',          (0,0), (-1,-1), 0.4, colors.HexColor('#AFA9EC')),
-        ('TOPPADDING',    (0,0), (-1,-1), 7),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 7),
-        ('LEFTPADDING',   (0,0), (-1,-1), 8),
-        ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
+    table = Table(summary_data, colWidths=[4.5*cm, 4.5*cm, 3.5*cm, 4.5*cm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND',  (0,0), (-1,0), PURPLE),
+        ('TEXTCOLOR',   (0,0), (-1,0), colors.white),
+        ('FONTNAME',    (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE',    (0,0), (-1,0), 10),
+        ('BACKGROUND',  (0,1), (-1,-1), LIGHT_BLUE),
+        ('FONTSIZE',    (0,1), (-1,-1), 10),
+        ('ALIGN',       (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN',      (0,0), (-1,-1), 'MIDDLE'),
+        ('ROWHEIGHT',   (0,0), (-1,-1), 22),
+        ('GRID',        (0,0), (-1,-1), 0.5, PURPLE),
     ]))
+    story.append(table)
+    story.append(Spacer(1, 16))
 
-    items.append(t)
-    items.append(Spacer(1, 14))
-    return items
+    # ── Visual Analysis Images ────────────────────────────────────────
+    story.append(Paragraph("Visual Analysis", styles['section']))
+    story.append(Spacer(1, 6))
 
-
-def _image_section(styles, images):
-    items = []
-    items.append(Paragraph("Visual Analysis", styles['section']))
-    items.append(Spacer(1, 5))
-
-    img_row    = []
+    img_row = []
     img_labels = []
 
     for key, label in [
         ('mask_b64',    'Segmentation Mask'),
         ('overlay_b64', 'Mask Overlay'),
-        ('gradcam_b64', 'Saliency Map'),
+        ('gradcam_b64', 'AI Saliency Map'),
     ]:
         b64 = images.get(key)
         if b64:
-            buf = io.BytesIO(base64.b64decode(b64))
-            img_row.append(RLImage(buf, width=5*cm, height=5*cm))
-            img_labels.append(Paragraph(label, styles['img_label']))
+            # Strip scheme if present
+            if b64.startswith("data:"):
+                b64 = b64.split(",")[1]
+            try:
+                img_buf = io.BytesIO(base64.b64decode(b64))
+                rl_img  = RLImage(img_buf, width=5*cm, height=5*cm)
+                img_row.append(rl_img)
+                img_labels.append(label)
+            except Exception:
+                pass
 
     if img_row:
-        n   = len(img_row)
-        col = (A4[0] - 2*MARGIN) / n
-        img_tbl = Table(
-            [img_row, img_labels],
-            colWidths=[col] * n
+        n = len(img_row)
+        col_w = 5.5 * cm
+        img_table = Table(
+            [img_row, [Paragraph(l, styles['img_label']) for l in img_labels]],
+            colWidths=[col_w] * n
         )
-        img_tbl.setStyle(TableStyle([
-            ('ALIGN',         (0,0), (-1,-1), 'CENTER'),
-            ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
-            ('BACKGROUND',    (0,1), (-1,1), LIGHT_GRAY),
-            ('TOPPADDING',    (0,1), (-1,1), 4),
-            ('BOTTOMPADDING', (0,1), (-1,1), 4),
-            ('BOX',           (0,0), (-1,-1), 0.4, colors.HexColor('#e2e0f5')),
-            ('INNERGRID',     (0,0), (-1,-1), 0.4, colors.HexColor('#e2e0f5')),
+        img_table.setStyle(TableStyle([
+            ('ALIGN',  (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ]))
-        items.append(img_tbl)
+        story.append(img_table)
+        story.append(Spacer(1, 16))
 
-    items.append(Spacer(1, 14))
-    return items
-
-
-def _clinical_report_section(styles, clinical_report):
-    items = []
-    items.append(HRFlowable(width="100%", thickness=0.5, color=GRAY, spaceAfter=8))
-    items.append(Paragraph("Clinical Report", styles['section']))
-    items.append(Spacer(1, 4))
+    # ── Clinical report sections ──────────────────────────────────────
+    story.append(HRFlowable(width="100%", thickness=0.5, color=GRAY, spaceAfter=8))
+    story.append(Paragraph("AI Clinical Evaluation", styles['section']))
+    story.append(Spacer(1, 6))
 
     sections = clinical_report.get('sections', {})
     section_order = [
@@ -294,28 +186,14 @@ def _clinical_report_section(styles, clinical_report):
     for key, display in section_order:
         text = sections.get(key)
         if text:
-            block = KeepTogether([
-                Table(
-                    [[Paragraph(display, styles['report_heading'])]],
-                    colWidths=['100%'],
-                    style=TableStyle([
-                        ('BACKGROUND',    (0,0), (-1,-1), PURPLE_LIGHT),
-                        ('LEFTPADDING',   (0,0), (-1,-1), 8),
-                        ('TOPPADDING',    (0,0), (-1,-1), 4),
-                        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
-                        ('LINEAFTER',     (0,0), (0,-1), 3, PURPLE),
-                    ])
-                ),
-                Spacer(1, 3),
-                Paragraph(_markdown_to_rl(text), styles['body']),
-                Spacer(1, 10),
-            ])
-            items.append(block)
+            story.append(Paragraph(display, styles['subsection']))
+            story.append(Paragraph(_markdown_to_rl(text), styles['body']))
+            story.append(Spacer(1, 10))
 
-    return items
+    # ── Footer / Signature ─────────────────────────────────────────────
+    story.append(Spacer(1, 12))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=GRAY, spaceBefore=12, spaceAfter=12))
 
-
-def _signature_block(styles, patient, case_id):
     # Generate QR Code
     qr = qrcode.QRCode(box_size=3, border=1)
     qr.add_data(f"https://secure.deepmammo.app/verify/{case_id}")
@@ -347,105 +225,54 @@ def _signature_block(styles, patient, case_id):
         ('ALIGN', (1,0), (2,0), 'RIGHT'),
         ('VALIGN', (0,0), (-1,-1), 'BOTTOM'),
         ('BOX',           (0,0), (-1,-1), 0.5, colors.HexColor('#E2E8F0')),
-        ('BACKGROUND',    (0,0), (-1,-1), LIGHT_GRAY),
+        ('BACKGROUND',    (0,0), (-1,-1), LIGHT_BLUE),
         ('TOPPADDING',    (0,0), (-1,-1), 10),
         ('BOTTOMPADDING', (0,0), (-1,-1), 10),
         ('LEFTPADDING',   (0,0), (-1,-1), 12),
         ('RIGHTPADDING',  (-1,0), (-1,-1), 12),
     ]))
-    return [Spacer(1, 10), sig_table, Spacer(1, 10)]
-
-
-def _footer(styles, clinical_report):
-    items = []
-
-    items.append(Spacer(1, 8))
-    items.append(HRFlowable(width="100%", thickness=0.5, color=GRAY))
-
-    footer_table = Table(
-        [[
-            Paragraph(
-                "Generated by <b>DeepMammo AI System</b><br/>"
-                "Developed by <b>Wilfred Ayine</b> · AI Engineer (in training)",
-                styles['footer_left']
-            ),
-            Paragraph(
-                f"Model: {clinical_report.get('model_used', 'Groq LLM')}<br/>"
-                f"DeepMammo v1.0 · {datetime.utcnow().strftime('%Y')}",
-                styles['footer_right']
-            ),
-        ]],
-        colWidths=['60%', '40%'],
-    )
-    footer_table.setStyle(TableStyle([
-        ('VALIGN',        (0,0), (-1,-1), 'TOP'),
-        ('TOPPADDING',    (0,0), (-1,-1), 6),
-        ('LEFTPADDING',   (0,0), (0,-1), 0),
-        ('RIGHTPADDING',  (-1,0), (-1,-1), 0),
-    ]))
-
-    items.append(footer_table)
-    items.append(Spacer(1, 6))
-    items.append(Paragraph(
-        "⚠ This report is AI-generated and has not been reviewed by a licensed radiologist. "
-        "It must not be used as the sole basis for any clinical decision. "
-        "Always consult a qualified medical professional.",
+    story.append(sig_table)
+    
+    story.append(Spacer(1, 12))
+    story.append(Paragraph(
+        "Disclaimer: This assessment is AI-assisted using the advanced <b>DeepMammo</b> neural networks "
+        "developed by <b>Wilfred Ayine</b>. It is intended to support, not replace, clinical judgment "
+        "by a qualified healthcare professional.",
         styles['disclaimer']
     ))
-    return items
 
+    doc.build(story)
+    return base64.b64encode(buf.getvalue()).decode('utf-8')
 
-# ── Styles ────────────────────────────────────────────────────────────
 
 def _build_styles() -> dict:
+    base = getSampleStyleSheet()
     return {
-        'brand': ParagraphStyle('brand',
-            fontSize=18, fontName='Helvetica-Bold',
-            textColor=WHITE),
-        'header_date': ParagraphStyle('header_date',
+        'title': ParagraphStyle('title',
+            fontSize=22, fontName='Helvetica-Bold',
+            textColor=PURPLE, alignment=TA_CENTER, spaceAfter=4, leading=26),
+        'subtitle': ParagraphStyle('subtitle',
+            fontSize=11, fontName='Helvetica',
+            textColor=DARK, alignment=TA_CENTER, spaceAfter=2, leading=14),
+        'meta': ParagraphStyle('meta',
             fontSize=8, fontName='Helvetica',
-            textColor=colors.HexColor('#d0cef5'),
-            alignment=TA_RIGHT),
-        'header_sub': ParagraphStyle('header_sub',
-            fontSize=9, fontName='Helvetica',
-            textColor=GRAY, alignment=TA_CENTER,
-            spaceBefore=5, spaceAfter=4),
+            textColor=GRAY, alignment=TA_CENTER, spaceAfter=10, leading=10),
         'section': ParagraphStyle('section',
+            fontSize=13, fontName='Helvetica-Bold',
+            textColor=PURPLE, spaceAfter=8, leading=16),
+        'subsection': ParagraphStyle('subsection',
             fontSize=11, fontName='Helvetica-Bold',
-            textColor=PURPLE, spaceAfter=4, spaceBefore=4),
-        'info_label': ParagraphStyle('info_label',
-            fontSize=8, fontName='Helvetica-Bold',
-            textColor=GRAY),
-        'info_value': ParagraphStyle('info_value',
-            fontSize=9, fontName='Helvetica',
-            textColor=DARK),
-        'th': ParagraphStyle('th',
-            fontSize=9, fontName='Helvetica-Bold',
-            textColor=WHITE, alignment=TA_CENTER),
-        'td': ParagraphStyle('td',
-            fontSize=9, fontName='Helvetica',
-            textColor=DARK),
-        'td_center': ParagraphStyle('td_center',
-            fontSize=9, fontName='Helvetica',
-            textColor=DARK, alignment=TA_CENTER),
-        'report_heading': ParagraphStyle('report_heading',
-            fontSize=9, fontName='Helvetica-Bold',
-            textColor=PURPLE),
+            textColor=DARK, spaceAfter=4, leading=14),
         'body': ParagraphStyle('body',
-            fontSize=9, fontName='Helvetica',
-            textColor=DARK, leading=14, alignment=TA_JUSTIFY),
+            fontSize=10, fontName='Helvetica',
+            textColor=DARK, leading=14, alignment=TA_LEFT),
+        'body_bullet': ParagraphStyle('body_bullet',
+            fontSize=10, fontName='Helvetica',
+            textColor=DARK, leading=14, alignment=TA_LEFT, leftIndent=12),
         'img_label': ParagraphStyle('img_label',
-            fontSize=8, fontName='Helvetica',
+            fontSize=8, fontName='Helvetica-Bold',
             textColor=GRAY, alignment=TA_CENTER),
-        'footer_left': ParagraphStyle('footer_left',
-            fontSize=7.5, fontName='Helvetica',
-            textColor=GRAY, leading=11),
-        'footer_right': ParagraphStyle('footer_right',
-            fontSize=7.5, fontName='Helvetica',
-            textColor=GRAY, alignment=TA_RIGHT, leading=11),
         'disclaimer': ParagraphStyle('disclaimer',
-            fontSize=7.5, fontName='Helvetica-Oblique',
-            textColor=GRAY, alignment=TA_CENTER,
-            borderColor=colors.HexColor('#e2e0f5'),
-            borderWidth=0.5, borderPadding=5),
+            fontSize=8, fontName='Helvetica-Oblique',
+            textColor=GRAY, alignment=TA_CENTER),
     }
