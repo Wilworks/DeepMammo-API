@@ -55,8 +55,94 @@ document.addEventListener('DOMContentLoaded', () => {
   const modelSelect     = document.getElementById('modelSelect') as HTMLSelectElement | null;
   const customThreshold = document.getElementById('customThreshold') as HTMLInputElement | null;
 
+  // Upload visual helpers
+  const uploadIcon = uploadZone?.querySelector('.upload-icon') as HTMLDivElement | null;
+  const uploadHelperText = document.getElementById('uploadHelperText') as HTMLElement | null;
+  const uploadPreviewContainer = document.getElementById('uploadPreviewContainer') as HTMLDivElement | null;
+  const imgUploadPreview = document.getElementById('imgUploadPreview') as HTMLImageElement | null;
+
+  // Telemetry element selections
+  const telemetryTotalRequests = document.getElementById('telemetryTotalRequests');
+  const telemetryAvgLatency = document.getElementById('telemetryAvgLatency');
+  const telemetrySuccessRate = document.getElementById('telemetrySuccessRate');
+  const telemetryCredits = document.getElementById('telemetryCredits');
+  const analyticsTableBody = document.getElementById('analyticsTableBody');
+
   let selectedFile: File | null = null;
   let pdfB64: string | null     = null;
+
+  interface Transaction {
+    timestamp: string;
+    endpoint: string;
+    status: string;
+    latency: number;
+    model: string;
+  }
+
+  function getTransactions(): Transaction[] {
+    const raw = localStorage.getItem('deepmammo_session_transactions');
+    if (raw) return JSON.parse(raw);
+    const defaults: Transaction[] = [
+      { timestamp: '2026-05-27 19:04:12', endpoint: 'POST /api/predict/', status: '200 OK', latency: 2.31, model: 'deepmammo-v1-resnet' },
+      { timestamp: '2026-05-27 18:59:04', endpoint: 'POST /api/predict/', status: '200 OK', latency: 2.45, model: 'deepmammo-v1-resnet' },
+      { timestamp: '2026-05-27 18:44:31', endpoint: 'POST /api/predict/', status: '500 Server Error', latency: 0.12, model: 'deepmammo-v2-vit' }
+    ];
+    localStorage.setItem('deepmammo_session_transactions', JSON.stringify(defaults));
+    return defaults;
+  }
+
+  function addTransaction(tx: Transaction) {
+    const list = getTransactions();
+    list.unshift(tx);
+    localStorage.setItem('deepmammo_session_transactions', JSON.stringify(list));
+    updateAnalyticsTelemetry();
+  }
+
+  function updateAnalyticsTelemetry() {
+    const list = getTransactions();
+    if (telemetryTotalRequests) {
+      telemetryTotalRequests.textContent = (14204 + list.length - 3).toLocaleString();
+    }
+    
+    if (list.length > 0) {
+      const avg = list.reduce((acc, tx) => acc + tx.latency, 0) / list.length;
+      if (telemetryAvgLatency) {
+        telemetryAvgLatency.textContent = avg.toFixed(2) + 's';
+      }
+      
+      const successes = list.filter(tx => tx.status.includes('200')).length;
+      const rate = (successes / list.length) * 100;
+      if (telemetrySuccessRate) {
+        telemetrySuccessRate.textContent = rate.toFixed(2) + '%';
+      }
+    }
+
+    if (telemetryCredits) {
+      const actualCalls = list.length - 3;
+      const cost = Math.max(0, actualCalls * 0.05);
+      telemetryCredits.textContent = '$' + (48.50 - cost).toFixed(2);
+    }
+
+    if (analyticsTableBody) {
+      analyticsTableBody.innerHTML = '';
+      list.forEach(tx => {
+        const isOk = tx.status.includes('200');
+        const statusClass = isOk ? 'status-ok' : 'status-error';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${tx.timestamp}</td>
+          <td><code>${tx.endpoint}</code></td>
+          <td><span class="status-pill ${statusClass}">${tx.status}</span></td>
+          <td>${tx.latency.toFixed(2)}s</td>
+          <td><code>${tx.model}</code></td>
+        `;
+        analyticsTableBody.appendChild(tr);
+      });
+    }
+  }
+
+  // Populate dynamic telemetry cards on start
+  updateAnalyticsTelemetry();
 
   if (!uploadZone || !imageInput || !predictBtn || !resetBtn || !fileNameEl || !loadingEl || !resultsEl || !errorBox || !downloadBtn || !modalOverlay) {
     console.error("Required dashboard DOM elements are missing.");
@@ -140,9 +226,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render local preview of original scan
     const reader = new FileReader();
     reader.onload = (e) => {
-      const previewEl = document.getElementById('imgOriginalPreview') as HTMLImageElement | null;
-      if (previewEl && e.target?.result) {
-        previewEl.src = e.target.result as string;
+      if (e.target?.result) {
+        const previewEl = document.getElementById('imgOriginalPreview') as HTMLImageElement | null;
+        if (previewEl) {
+          previewEl.src = e.target.result as string;
+        }
+        if (imgUploadPreview) {
+          imgUploadPreview.src = e.target.result as string;
+        }
+        if (uploadPreviewContainer) {
+          uploadPreviewContainer.classList.remove('hidden');
+        }
+        if (uploadIcon) {
+          uploadIcon.classList.add('hidden');
+        }
+        if (uploadHelperText) {
+          uploadHelperText.classList.add('hidden');
+        }
       }
     };
     reader.readAsDataURL(file);
@@ -175,8 +275,13 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('triage_override', activeTriage.value);
     }
 
+    const startTime = performance.now();
+    let statusText = '200 OK';
+
     try {
       const res = await fetch('/api/predict/', { method: 'POST', body: formData });
+      const durationSeconds = (performance.now() - startTime) / 1000;
+      
       const data = await res.json();
       
       // Trace JSON payload to dashboard contrast panel
@@ -185,11 +290,35 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (!res.ok) {
+        statusText = `${res.status} Error`;
+        addTransaction({
+          timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+          endpoint: 'POST /api/predict/',
+          status: statusText,
+          latency: durationSeconds,
+          model: modelSelect ? modelSelect.value : 'deepmammo-v1-resnet'
+        });
         showError(data.error || 'Prediction failed.');
         return;
       }
+
+      addTransaction({
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        endpoint: 'POST /api/predict/',
+        status: '200 OK',
+        latency: durationSeconds,
+        model: modelSelect ? modelSelect.value : 'deepmammo-v1-resnet'
+      });
       renderResults(data);
     } catch (err) {
+      const durationSeconds = (performance.now() - startTime) / 1000;
+      addTransaction({
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        endpoint: 'POST /api/predict/',
+        status: '500 Net Error',
+        latency: durationSeconds,
+        model: modelSelect ? modelSelect.value : 'deepmammo-v1-resnet'
+      });
       showError('Network error. Is the server running?');
     } finally {
       loadingEl.classList.add('hidden');
@@ -386,6 +515,12 @@ document.addEventListener('DOMContentLoaded', () => {
     resultsEl.classList.add('hidden');
     hideError();
 
+    // Reset upload preview
+    if (imgUploadPreview) imgUploadPreview.src = '';
+    if (uploadPreviewContainer) uploadPreviewContainer.classList.add('hidden');
+    if (uploadIcon) uploadIcon.classList.remove('hidden');
+    if (uploadHelperText) uploadHelperText.classList.remove('hidden');
+
     // Reset local preview image
     const previewEl = document.getElementById('imgOriginalPreview') as HTMLImageElement | null;
     if (previewEl) previewEl.src = '';
@@ -512,6 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
       keys.push(newKey);
       saveKeys(keys);
       renderKeys();
+      updateDocsCodeSnippet();
       newKeyInput.value = '';
       alert(`API Key "${name}" successfully generated!`);
     });
@@ -522,17 +658,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCopyDocsCode = document.getElementById('btnCopyDocsCode') as HTMLButtonElement | null;
   const codeTabButtons = document.querySelectorAll('.code-tab-btn');
 
-  const recipes: Record<string, string> = {
-    curl: `curl -X POST http://127.0.0.1:8000/api/predict/ \\
-  -H "Authorization: Bearer sk_live_dev_8f2d4e9a1b7c093f12" \\
+  function getActiveApiKey(): string {
+    const keys = getKeys();
+    if (keys.length > 0) {
+      return keys[keys.length - 1].key;
+    }
+    return 'sk_live_dev_8f2d4e9a1b7c093f12';
+  }
+
+  function getRecipes(): Record<string, string> {
+    const key = getActiveApiKey();
+    return {
+      curl: `curl -X POST http://127.0.0.1:8000/api/predict/ \\
+  -H "Authorization: Bearer ${key}" \\
   -F "image=@scan.png" \\
   -F "model_routing=deepmammo-v1-resnet" \\
   -F "confidence_threshold=0.85"`,
-    python: `import requests
+      python: `import requests
 
 url = "http://127.0.0.1:8000/api/predict/"
 headers = {
-    "Authorization": "Bearer sk_live_dev_8f2d4e9a1b7c093f12"
+    "Authorization": "Bearer ${key}"
 }
 files = {
     "image": open("scan.png", "rb")
@@ -544,7 +690,7 @@ data = {
 
 response = requests.post(url, headers=headers, files=files, data=data)
 print(response.json())`,
-    javascript: `const formData = new FormData();
+      javascript: `const formData = new FormData();
 formData.append("image", fileInput.files[0]);
 formData.append("model_routing", "deepmammo-v1-resnet");
 formData.append("confidence_threshold", "0.85");
@@ -552,14 +698,25 @@ formData.append("confidence_threshold", "0.85");
 fetch("http://127.0.0.1:8000/api/predict/", {
   method: "POST",
   headers: {
-    "Authorization": "Bearer sk_live_dev_8f2d4e9a1b7c093f12"
+    "Authorization": "Bearer ${key}"
   },
   body: formData
 })
 .then(response => response.json())
 .then(data => console.log(data))
 .catch(error => console.error("Error:", error));`
-  };
+    };
+  }
+
+  function updateDocsCodeSnippet() {
+    if (!docsCodeBlock) return;
+    const activeBtn = document.querySelector('.code-tab-btn.active') as HTMLButtonElement | null;
+    const lang = activeBtn?.getAttribute('data-lang') || 'curl';
+    const recipesList = getRecipes();
+    if (recipesList[lang]) {
+      docsCodeBlock.textContent = recipesList[lang];
+    }
+  }
 
   codeTabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -567,11 +724,7 @@ fetch("http://127.0.0.1:8000/api/predict/", {
       codeTabButtons.forEach(b => b.classList.remove('active'));
       // Add active to current
       btn.classList.add('active');
-      
-      const lang = btn.getAttribute('data-lang') || 'curl';
-      if (docsCodeBlock && recipes[lang]) {
-        docsCodeBlock.textContent = recipes[lang];
-      }
+      updateDocsCodeSnippet();
     });
   });
 
@@ -583,6 +736,9 @@ fetch("http://127.0.0.1:8000/api/predict/", {
       }
     });
   }
+
+  // Populate docs code recipe on start
+  updateDocsCodeSnippet();
 
   // Initial keys render
   renderKeys();

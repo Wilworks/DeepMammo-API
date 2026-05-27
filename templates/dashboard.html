@@ -123,8 +123,11 @@ html, body { overflow: hidden !important; }
         </div>
         <p><strong>Click to upload</strong> or drag and drop</p>
 
-        <p style="font-size:.8rem;margin-top:4px;">PNG or JPG &mdash; max 20 MB</p>
+        <p style="font-size:.8rem;margin-top:4px;color:var(--text-light);" id="uploadHelperText">PNG or JPG &mdash; max 20 MB</p>
         <div class="file-name hidden" id="fileName"></div>
+        <div id="uploadPreviewContainer" class="hidden" style="margin-top: 10px; text-align: center; width: 100%; max-height: 150px; overflow: hidden; border-radius: 6px; border: 1px solid var(--border);">
+          <img id="imgUploadPreview" src="" alt="Uploaded specimen preview" style="max-width: 100%; max-height: 150px; object-fit: contain; background: #000; display: block; margin: 0 auto;">
+        </div>
       </div>
       <div style="margin-top:1.25rem;display:flex;gap:1rem;align-items:center;">
         <button class="btn shimmer-button" id="predictBtn" disabled>&#9654;&nbsp;Run Analysis</button>
@@ -324,7 +327,7 @@ html, body { overflow: hidden !important; }
       <div class="telemetry-grid">
         <div class="card telemetry-card">
           <div class="telemetry-label">Total API Requests</div>
-          <div class="telemetry-value">14,204</div>
+          <div class="telemetry-value" id="telemetryTotalRequests">14,204</div>
           <div class="telemetry-change positive">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             <span>+12.4% this week</span>
@@ -332,7 +335,7 @@ html, body { overflow: hidden !important; }
         </div>
         <div class="card telemetry-card">
           <div class="telemetry-label">Avg. Response Time</div>
-          <div class="telemetry-value">2.41s</div>
+          <div class="telemetry-value" id="telemetryAvgLatency">2.41s</div>
           <div class="telemetry-change positive">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px; transform: rotate(180deg);"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             <span>-8.2% latency drop</span>
@@ -340,12 +343,12 @@ html, body { overflow: hidden !important; }
         </div>
         <div class="card telemetry-card">
           <div class="telemetry-label">Success Rate</div>
-          <div class="telemetry-value">99.82%</div>
+          <div class="telemetry-value" id="telemetrySuccessRate">99.82%</div>
           <div class="telemetry-badge success">Active</div>
         </div>
         <div class="card telemetry-card">
           <div class="telemetry-label">Remaining Credits</div>
-          <div class="telemetry-value">$48.50</div>
+          <div class="telemetry-value" id="telemetryCredits">$48.50</div>
           <div class="telemetry-badge warning">Renew Soon</div>
         </div>
       </div>
@@ -406,7 +409,7 @@ html, body { overflow: hidden !important; }
                 <th>Model</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="analyticsTableBody">
               <tr>
                 <td>2026-05-27 19:04:12</td>
                 <td><code>POST /v1/analyze-mammogram</code></td>

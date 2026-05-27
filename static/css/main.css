@@ -815,7 +815,7 @@ footer a:hover { color: var(--purple) !important; }
 /* Playground tab uses internal grid to keep the side-by-side view */
 #workspace-playground.workspace-tab.active-tab {
   display: grid;
-  grid-template-columns: 420px 1fr;
+  grid-template-columns: 1fr 1fr;
   height: 100%;
   width: 100%;
 }
