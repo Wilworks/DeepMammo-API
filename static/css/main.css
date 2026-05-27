@@ -299,6 +299,10 @@ main { flex: 1; }
   border-color: rgba(255, 255, 255, 0.05) !important;
   padding: 1.25rem !important;
   margin-bottom: 1.25rem;
+  max-height: 250px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 .json-header {
   display: flex;

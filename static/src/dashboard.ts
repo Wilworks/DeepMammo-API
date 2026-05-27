@@ -248,6 +248,25 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsDataURL(file);
   }
 
+  function truncateBase64InJson(obj: any): any {
+    const clone = JSON.parse(JSON.stringify(obj));
+    const truncate = (val: any) => {
+      if (typeof val === 'string' && val.length > 100) {
+        return val.substring(0, 50) + `... [truncated base64, total ${val.length.toLocaleString()} chars] ...`;
+      }
+      return val;
+    };
+    
+    if (clone.segmentation) {
+      if (clone.segmentation.mask_b64) clone.segmentation.mask_b64 = truncate(clone.segmentation.mask_b64);
+      if (clone.segmentation.overlay_b64) clone.segmentation.overlay_b64 = truncate(clone.segmentation.overlay_b64);
+    }
+    if (clone.gradcam_b64) clone.gradcam_b64 = truncate(clone.gradcam_b64);
+    if (clone.pdf_b64) clone.pdf_b64 = truncate(clone.pdf_b64);
+    
+    return clone;
+  }
+
   // ── Run Analysis Pipeline ──────────────────────────────────────────
   predictBtn.addEventListener('click', async () => {
     if (!selectedFile) return;
@@ -286,7 +305,8 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Trace JSON payload to dashboard contrast panel
       if (jsonOutput) {
-        jsonOutput.textContent = JSON.stringify(data, null, 2);
+        const truncatedData = truncateBase64InJson(data);
+        jsonOutput.textContent = JSON.stringify(truncatedData, null, 2);
       }
 
       if (!res.ok) {
