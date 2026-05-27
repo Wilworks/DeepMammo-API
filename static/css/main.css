@@ -464,7 +464,8 @@ footer a:hover { color: var(--purple) !important; }
 .upload-zone {
   border: 2px dashed var(--border) !important;
   border-radius: var(--radius) !important;
-  padding: 3.5rem 2rem !important;
+  padding: 2.2rem 1.5rem !important;
+
   text-align: center !important;
   cursor: pointer !important;
   transition: var(--transition) !important;
@@ -592,11 +593,13 @@ footer a:hover { color: var(--purple) !important; }
 /* ── Three-Panel Dashboard Grid Shell ────────────────────────────── */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 240px 1.1fr 1.2fr;
-  min-height: calc(100vh - 64px);
+  grid-template-columns: 240px 420px 1fr;
+  height: calc(100vh - 64px);
   background: var(--bg);
   font-family: var(--font-body);
+  overflow: hidden; /* Lock the viewport for a premium desktop-app feel */
 }
+
 
 .sidebar-panel {
   background: var(--brand-navy);
