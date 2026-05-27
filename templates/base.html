@@ -40,6 +40,7 @@
 
   <main>{% block content %}{% endblock %}</main>
 
+  {% block footer %}
   <footer>
     <div><strong>DeepMammo</strong> — AI-Assisted Mammography Analysis</div>
     <div style="margin-top:6px;">
@@ -48,6 +49,7 @@
       <span>Developed by <strong>Wilfred Ayine</strong></span>
     </div>
   </footer>
+  {% endblock %}
 
   {% block extra_js %}{% endblock %}
 </body>

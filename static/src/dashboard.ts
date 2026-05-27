@@ -63,7 +63,44 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
+  // ── Tab State Manager ──────────────────────────────────────────────
+  const navPlayground = document.getElementById('nav-playground');
+  const navAnalytics  = document.getElementById('nav-analytics');
+  const navKeys       = document.getElementById('nav-keys');
+  const navDocs       = document.getElementById('nav-docs');
+
+  const workspacePlayground = document.getElementById('workspace-playground');
+  const workspaceAnalytics  = document.getElementById('workspace-analytics');
+  const workspaceKeys       = document.getElementById('workspace-keys');
+  const workspaceDocs       = document.getElementById('workspace-docs');
+
+  const tabs = [
+    { nav: navPlayground, ws: workspacePlayground },
+    { nav: navAnalytics,  ws: workspaceAnalytics },
+    { nav: navKeys,       ws: workspaceKeys },
+    { nav: navDocs,       ws: workspaceDocs }
+  ];
+
+  tabs.forEach(tab => {
+    if (tab.nav && tab.ws) {
+      tab.nav.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Remove active class from all navs and hide all workspaces
+        tabs.forEach(t => {
+          t.nav?.classList.remove('active');
+          t.ws?.classList.remove('active-tab');
+        });
+
+        // Activate the clicked tab
+        tab.nav.classList.add('active');
+        tab.ws.classList.add('active-tab');
+      });
+    }
+  });
+
   // ── File Handling & Specimen Previews ──────────────────────────────
+
   uploadZone.addEventListener('click', () => imageInput.click());
   imageInput.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -370,7 +407,188 @@ document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
+  // ── API Keys Management ───────────────────────────────────────────
+  interface ApiKey {
+    id: string;
+    name: string;
+    key: string;
+    created: string;
+    scope: string;
+  }
+
+  const newKeyInput = document.getElementById('newKeyName') as HTMLInputElement | null;
+  const btnCreateKey = document.getElementById('btnCreateKey') as HTMLButtonElement | null;
+  const apiKeysTableBody = document.getElementById('apiKeysTableBody') as HTMLTableSectionElement | null;
+
+  function getKeys(): ApiKey[] {
+    const keysRaw = localStorage.getItem('deepmammo_api_keys');
+    if (keysRaw) {
+      return JSON.parse(keysRaw);
+    }
+    // Default initial mock keys
+    const defaults: ApiKey[] = [
+      { id: '1', name: 'Default Developer Key', key: 'sk_live_dev_8f2d4e9a1b7c093f12', created: '2026-05-24', scope: 'Read/Write' },
+      { id: '2', name: 'Staging Analytics', key: 'sk_live_stg_09c3a2f8b5e7d14f77', created: '2026-05-26', scope: 'Read Only' }
+    ];
+    localStorage.setItem('deepmammo_api_keys', JSON.stringify(defaults));
+    return defaults;
+  }
+
+  function saveKeys(keys: ApiKey[]) {
+    localStorage.setItem('deepmammo_api_keys', JSON.stringify(keys));
+  }
+
+  function renderKeys() {
+    if (!apiKeysTableBody) return;
+    const keys = getKeys();
+    apiKeysTableBody.innerHTML = '';
+    keys.forEach(key => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${key.name}</strong></td>
+        <td>${key.created}</td>
+        <td>
+          <code class="key-display" data-full-key="${key.key}">••••••••••••••••</code>
+        </td>
+        <td><span class="badge badge-benign" style="font-size: 0.7rem; background:#E2F8E8; color:#10B981;">${key.scope}</span></td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-action btn-reveal" style="background:#F1F5F9; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer; font-weight:600; color:var(--brand-navy);">Reveal</button>
+            <button class="btn-action btn-copy" style="background:#F1F5F9; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer; font-weight:600; color:var(--brand-navy);">Copy</button>
+            <button class="btn-action btn-revoke" style="background:rgba(216, 90, 48, 0.1); border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer; font-weight:600; color:var(--rose-coral);">Revoke</button>
+          </div>
+        </td>
+      `;
+
+      const revealBtn = tr.querySelector('.btn-reveal') as HTMLButtonElement;
+      const copyBtn = tr.querySelector('.btn-copy') as HTMLButtonElement;
+      const revokeBtn = tr.querySelector('.btn-revoke') as HTMLButtonElement;
+      const codeEl = tr.querySelector('.key-display') as HTMLElement;
+
+      revealBtn.addEventListener('click', () => {
+        if (codeEl.textContent?.includes('•')) {
+          codeEl.textContent = codeEl.getAttribute('data-full-key');
+          revealBtn.textContent = 'Hide';
+        } else {
+          codeEl.textContent = '••••••••••••••••';
+          revealBtn.textContent = 'Reveal';
+        }
+      });
+
+      copyBtn.addEventListener('click', () => {
+        const fullKey = codeEl.getAttribute('data-full-key') || '';
+        navigator.clipboard.writeText(fullKey);
+        alert(`Copied key "${key.name}" to clipboard!`);
+      });
+
+      revokeBtn.addEventListener('click', () => {
+        if (confirm(`Are you absolutely sure you want to revoke the credential "${key.name}"? This action cannot be undone.`)) {
+          const freshKeys = getKeys().filter(k => k.id !== key.id);
+          saveKeys(freshKeys);
+          renderKeys();
+        }
+      });
+
+      apiKeysTableBody.appendChild(tr);
+    });
+  }
+
+  if (btnCreateKey && newKeyInput) {
+    btnCreateKey.addEventListener('click', () => {
+      const name = newKeyInput.value.trim();
+      if (!name) {
+        alert('Please provide a descriptive name for your API key.');
+        return;
+      }
+      const randomHex = Array.from({ length: 24 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+      const newKey: ApiKey = {
+        id: Date.now().toString(),
+        name: name,
+        key: `sk_live_${randomHex}`,
+        created: new Date().toISOString().split('T')[0],
+        scope: 'Read/Write'
+      };
+      const keys = getKeys();
+      keys.push(newKey);
+      saveKeys(keys);
+      renderKeys();
+      newKeyInput.value = '';
+      alert(`API Key "${name}" successfully generated!`);
+    });
+  }
+
+  // ── Interactive API Docs Code Switcher ──────────────────────────────
+  const docsCodeBlock = document.getElementById('docsCodeBlock') as HTMLElement | null;
+  const btnCopyDocsCode = document.getElementById('btnCopyDocsCode') as HTMLButtonElement | null;
+  const codeTabButtons = document.querySelectorAll('.code-tab-btn');
+
+  const recipes: Record<string, string> = {
+    curl: `curl -X POST http://127.0.0.1:8000/api/predict/ \\
+  -H "Authorization: Bearer sk_live_dev_8f2d4e9a1b7c093f12" \\
+  -F "image=@scan.png" \\
+  -F "model_routing=deepmammo-v1-resnet" \\
+  -F "confidence_threshold=0.85"`,
+    python: `import requests
+
+url = "http://127.0.0.1:8000/api/predict/"
+headers = {
+    "Authorization": "Bearer sk_live_dev_8f2d4e9a1b7c093f12"
+}
+files = {
+    "image": open("scan.png", "rb")
+}
+data = {
+    "model_routing": "deepmammo-v1-resnet",
+    "confidence_threshold": "0.85"
+}
+
+response = requests.post(url, headers=headers, files=files, data=data)
+print(response.json())`,
+    javascript: `const formData = new FormData();
+formData.append("image", fileInput.files[0]);
+formData.append("model_routing", "deepmammo-v1-resnet");
+formData.append("confidence_threshold", "0.85");
+
+fetch("http://127.0.0.1:8000/api/predict/", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer sk_live_dev_8f2d4e9a1b7c093f12"
+  },
+  body: formData
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error("Error:", error));`
+  };
+
+  codeTabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Remove active class from all buttons
+      codeTabButtons.forEach(b => b.classList.remove('active'));
+      // Add active to current
+      btn.classList.add('active');
+      
+      const lang = btn.getAttribute('data-lang') || 'curl';
+      if (docsCodeBlock && recipes[lang]) {
+        docsCodeBlock.textContent = recipes[lang];
+      }
+    });
+  });
+
+  if (btnCopyDocsCode) {
+    btnCopyDocsCode.addEventListener('click', () => {
+      if (docsCodeBlock) {
+        navigator.clipboard.writeText(docsCodeBlock.textContent || '');
+        alert('Copied Code Recipe to clipboard!');
+      }
+    });
+  }
+
+  // Initial keys render
+  renderKeys();
+
   // ── UI Helper Logic ────────────────────────────────────────────────
+
   function pct(val: number) {
     return (val * 100).toFixed(1) + '%';
   }

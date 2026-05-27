@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <style>
+html, body { overflow: hidden !important; }
 .controller-panel h1, .monitor-panel h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--brand-navy); }
 .controller-panel .sub, .monitor-panel .sub { color: var(--text-light); font-size: 0.88rem; margin-bottom: 2rem; }
 
@@ -84,28 +85,32 @@
     </div>
     
     <nav class="sidebar-nav">
-      <a href="#" class="nav-item active">
+      <a href="#" class="nav-item active" id="nav-playground">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="2" ry="2"/><path d="m22 7-6.023 5.02c-.563.47-1.39.47-1.954 0L8 7"/><path d="M16 12v5"/><path d="M8 12v5"/></svg>
         <span>Playground</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" id="nav-analytics">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 20-3.5-3.5-3 3-4.5-4.5L4 18"/><path d="m12 14 3-3 3.5 3.5"/><path d="M19 14V4h-7"/></svg>
         <span>Usage Analytics</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" id="nav-keys">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3h3v-3Z"/></svg>
         <span>API Keys</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" id="nav-docs">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         <span>Docs & SDK</span>
       </a>
     </nav>
+
   </aside>
 
 
-  <!-- Column 2: Center Request Controller -->
-  <section class="controller-panel">
+  <!-- Workspace: Playground -->
+  <div id="workspace-playground" class="workspace-tab active-tab">
+    <!-- Column 2: Center Request Controller -->
+    <section class="controller-panel">
+
     <h1>API Playground</h1>
     <p class="sub">Upload mammogram specimens and configure model routing targets.</p>
 
@@ -305,7 +310,284 @@
       </div>
     </div>
   </section>
-</div>
+  </div> <!-- End of workspace-playground -->
+
+  <!-- Workspace: Usage Analytics -->
+  <div id="workspace-analytics" class="workspace-tab">
+    <div class="workspace-scroll-container">
+      <div class="workspace-header-bar">
+        <h1>API Usage Analytics</h1>
+        <p class="sub">Real-time telemetry and API consumption metrics.</p>
+      </div>
+
+      <!-- Telemetry Widgets Grid -->
+      <div class="telemetry-grid">
+        <div class="card telemetry-card">
+          <div class="telemetry-label">Total API Requests</div>
+          <div class="telemetry-value">14,204</div>
+          <div class="telemetry-change positive">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            <span>+12.4% this week</span>
+          </div>
+        </div>
+        <div class="card telemetry-card">
+          <div class="telemetry-label">Avg. Response Time</div>
+          <div class="telemetry-value">2.41s</div>
+          <div class="telemetry-change positive">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px; transform: rotate(180deg);"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            <span>-8.2% latency drop</span>
+          </div>
+        </div>
+        <div class="card telemetry-card">
+          <div class="telemetry-label">Success Rate</div>
+          <div class="telemetry-value">99.82%</div>
+          <div class="telemetry-badge success">Active</div>
+        </div>
+        <div class="card telemetry-card">
+          <div class="telemetry-label">Remaining Credits</div>
+          <div class="telemetry-value">$48.50</div>
+          <div class="telemetry-badge warning">Renew Soon</div>
+        </div>
+      </div>
+
+      <!-- Vector Chart Matrix -->
+      <div class="card mt-2">
+        <h3 class="section-label">Request Volume Over Time (Past 7 Days)</h3>
+        <div class="chart-container">
+          <svg viewBox="0 0 600 160" class="vector-chart">
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#10B981" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="40" x2="600" y2="40" stroke="#F1F5F9" stroke-width="1.5"/>
+            <line x1="0" y1="80" x2="600" y2="80" stroke="#F1F5F9" stroke-width="1.5"/>
+            <line x1="0" y1="120" x2="600" y2="120" stroke="#F1F5F9" stroke-width="1.5"/>
+            
+            <!-- Area Gradient Fill -->
+            <path d="M 0 130 C 80 120, 120 70, 200 80 C 280 90, 320 40, 400 30 C 480 20, 520 50, 600 20 L 600 160 L 0 160 Z" fill="url(#chartGrad)"/>
+            
+            <!-- Spline Chart Line -->
+            <path d="M 0 130 C 80 120, 120 70, 200 80 C 280 90, 320 40, 400 30 C 480 20, 520 50, 600 20" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round"/>
+            
+            <!-- Plot Points -->
+            <circle cx="0" cy="130" r="4.5" fill="#082F49" stroke="#10B981" stroke-width="2.5"/>
+            <circle cx="100" cy="115" r="4.5" fill="#082F49" stroke="#10B981" stroke-width="2.5"/>
+            <circle cx="200" cy="80" r="4.5" fill="#082F49" stroke="#10B981" stroke-width="2.5"/>
+            <circle cx="300" cy="85" r="4.5" fill="#082F49" stroke="#10B981" stroke-width="2.5"/>
+            <circle cx="400" cy="30" r="4.5" fill="#082F49" stroke="#10B981" stroke-width="2.5"/>
+            <circle cx="500" cy="40" r="4.5" fill="#082F49" stroke="#10B981" stroke-width="2.5"/>
+            <circle cx="600" cy="20" r="4.5" fill="#082F49" stroke="#10B981" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div class="chart-labels">
+          <span>May 21</span>
+          <span>May 22</span>
+          <span>May 23</span>
+          <span>May 24</span>
+          <span>May 25</span>
+          <span>May 26</span>
+          <span>May 27 (Today)</span>
+        </div>
+      </div>
+
+      <!-- Recent API logs table -->
+      <div class="card mt-2">
+        <h3 class="section-label">Recent API Transactions</h3>
+        <div style="overflow-x: auto;">
+          <table class="clinical-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Endpoint</th>
+                <th>Status</th>
+                <th>Latency</th>
+                <th>Model</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2026-05-27 19:04:12</td>
+                <td><code>POST /v1/analyze-mammogram</code></td>
+                <td><span class="status-pill status-ok">200 OK</span></td>
+                <td>2.31s</td>
+                <td><code>deepmammo-v1-resnet</code></td>
+              </tr>
+              <tr>
+                <td>2026-05-27 18:59:04</td>
+                <td><code>POST /v1/analyze-mammogram</code></td>
+                <td><span class="status-pill status-ok">200 OK</span></td>
+                <td>2.45s</td>
+                <td><code>deepmammo-v1-resnet</code></td>
+              </tr>
+              <tr>
+                <td>2026-05-27 18:44:31</td>
+                <td><code>POST /v1/analyze-mammogram</code></td>
+                <td><span class="status-pill status-error">500 Server Error</span></td>
+                <td>0.12s</td>
+                <td><code>deepmammo-v2-vit</code></td>
+              </tr>
+              <tr>
+                <td>2026-05-27 18:12:05</td>
+                <td><code>GET /v1/models</code></td>
+                <td><span class="status-pill status-ok">200 OK</span></td>
+                <td>0.08s</td>
+                <td><code>—</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Workspace: API Keys -->
+  <div id="workspace-keys" class="workspace-tab">
+    <div class="workspace-scroll-container">
+      <div class="workspace-header-bar">
+        <h1>API Credentials Manager</h1>
+        <p class="sub">Generate, secure, and manage API keys for your applications.</p>
+      </div>
+
+      <!-- Key Generator Controller -->
+      <div class="card">
+        <h3 class="section-label">Create Access Credential</h3>
+        <div style="margin-top:1rem; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <div style="flex:1; min-width:240px;">
+            <input type="text" id="newKeyName" class="form-control" placeholder="e.g. Production Mobile App" style="background:var(--white);">
+          </div>
+          <button class="btn shimmer-button" id="btnCreateKey">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+            <span>Generate API Key</span>
+          </button>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-light); margin-top:8px; font-style:italic;">
+          ⚠ Secure your credentials. Keys are displayed once upon creation and cannot be recovered if lost.
+        </p>
+      </div>
+
+      <!-- Active Keys Table -->
+      <div class="card mt-2">
+        <h3 class="section-label">Active Credentials</h3>
+        <div style="overflow-x: auto;">
+          <table class="clinical-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Created</th>
+                <th>Secret Token</th>
+                <th>Scope</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="apiKeysTableBody">
+              <!-- Keys will be dynamically rendered here via TypeScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Workspace: Docs & SDK -->
+  <div id="workspace-docs" class="workspace-tab">
+    <div class="workspace-scroll-container">
+      <div class="workspace-header-bar">
+        <h1>API Documentation & SDK Specs</h1>
+        <p class="sub">Integrate DeepMammo AI inference directly into your workflows and applications.</p>
+      </div>
+
+      <div class="docs-layout">
+        <!-- Schema panel -->
+        <div class="docs-schema-panel">
+          <div class="card">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:0.5rem;">
+              <span class="method-badge post">POST</span>
+              <code style="font-family:var(--font-mono); font-size:0.95rem; font-weight:700; color:var(--brand-navy);">/api/predict/</code>
+            </div>
+            <p style="font-size:0.88rem; color:var(--text-mid); margin-bottom:1.5rem;">
+              Submit a standard mammogram scan to run the full deep learning abnormality classifier, pathology segmenter, and Groq-powered diagnostic narrative generator.
+            </p>
+
+            <h3 class="section-label">Request Body (Multipart Form)</h3>
+            <div style="overflow-x: auto;">
+              <table class="clinical-table">
+                <thead>
+                  <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Required</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>image</code></td>
+                    <td>Binary File</td>
+                    <td><span class="badge badge-malignant" style="font-size:0.65rem; background:#FCE8E6; color:var(--rose-coral);">Required</span></td>
+                    <td>Mammogram scan (PNG or JPEG format, maximum file size 20 MB).</td>
+                  </tr>
+                  <tr>
+                    <td><code>model_routing</code></td>
+                    <td>String</td>
+                    <td><span class="badge" style="font-size:0.65rem; background:#E2E8F0; color:var(--text-light);">Optional</span></td>
+                    <td>Route to a specific backend classifier model. Options: <code>deepmammo-v1-resnet</code>, <code>deepmammo-v2-vit</code>.</td>
+                  </tr>
+                  <tr>
+                    <td><code>confidence_threshold</code></td>
+                    <td>Float</td>
+                    <td><span class="badge" style="font-size:0.65rem; background:#E2E8F0; color:var(--text-light);">Optional</span></td>
+                    <td>Classifier trigger threshold. Value range: <code>0.50</code> to <code>0.99</code>. Default is <code>0.85</code>.</td>
+                  </tr>
+                  <tr>
+                    <td><code>patient_info</code></td>
+                    <td>JSON String</td>
+                    <td><span class="badge" style="font-size:0.65rem; background:#E2E8F0; color:var(--text-light);">Optional</span></td>
+                    <td>Serialized metadata overrides (Name, ID, Referring Physician) to inject into PDF summaries.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code panel -->
+        <div class="docs-code-panel">
+          <div class="card json-block-card" style="margin-bottom:0 !important; height: 100%; display: flex; flex-direction: column;">
+            <div class="json-header" style="border-bottom:none; margin-bottom:0.5rem; padding-bottom:0;">
+              <h3>Code Execution Recipe</h3>
+              <div style="display:flex; gap:6px;">
+                <button class="btn-copy-json" id="btnCopyDocsCode">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                  <span>Copy Recipe</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Code switcher tabs -->
+            <div class="code-tabs">
+              <button class="code-tab-btn active" data-lang="curl">cURL</button>
+              <button class="code-tab-btn" data-lang="python">Python</button>
+              <button class="code-tab-btn" data-lang="javascript">JavaScript</button>
+            </div>
+
+            <!-- Code container -->
+            <pre class="json-pre" style="flex:1; margin-top:1rem;"><code id="docsCodeBlock" style="color:#A5F3FC;">curl -X POST http://127.0.0.1:8000/api/predict/ \\
+  -H "Authorization: Bearer sk_live_dev_8f2d4e9a1b7c093f12" \\
+  -F "image=@scan.png" \\
+  -F "model_routing=deepmammo-v1-resnet" \\
+  -F "confidence_threshold=0.85"</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div> <!-- End of dashboard-grid -->
+
 
 
 <!-- ── Patient info modal ──────────────────────────────────────────── -->
@@ -354,4 +636,6 @@
 {% block extra_js %}
 <script src="{% static 'dist/dashboard.js' %}"></script>
 {% endblock %}
+
+{% block footer %}{% endblock %}
 

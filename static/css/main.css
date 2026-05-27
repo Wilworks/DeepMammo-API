@@ -417,6 +417,209 @@ main { flex: 1; }
   display: block;
 }
 
+/* ── Workspace Containers & Header ────────────────────────────────── */
+.workspace-scroll-container {
+  height: 100%;
+  width: 100%;
+  padding: 2.5rem 3rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.workspace-header-bar {
+  margin-bottom: 2rem;
+}
+.workspace-header-bar h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--brand-navy);
+}
+.workspace-header-bar .sub {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* ── Telemetry Grid ───────────────────────────────────────────────── */
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.telemetry-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+.telemetry-label {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-light);
+}
+.telemetry-value {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--brand-navy);
+  line-height: 1.1;
+}
+.telemetry-change {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+.telemetry-change.positive { color: var(--emerald); }
+.telemetry-change.negative { color: var(--rose-coral); }
+.telemetry-badge {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.telemetry-badge.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--emerald);
+}
+.telemetry-badge.warning {
+  background: rgba(239, 159, 39, 0.1);
+  color: var(--amber);
+}
+
+/* ── Vector Chart ─────────────────────────────────────────────────── */
+.chart-container {
+  width: 100%;
+  background: var(--white);
+  margin-top: 1rem;
+}
+.vector-chart {
+  width: 100%;
+  height: 200px;
+}
+.chart-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+/* ── Clinical Tables ──────────────────────────────────────────────── */
+.clinical-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-family: var(--font-body);
+}
+.clinical-table th,
+.clinical-table td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+.clinical-table th {
+  background: var(--slate-light);
+  color: var(--text-mid);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+.clinical-table td {
+  color: var(--text-dark);
+}
+.clinical-table code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  background: var(--slate-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--brand-navy);
+}
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.status-pill.status-ok {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--emerald);
+}
+.status-pill.status-error {
+  background: rgba(216, 90, 48, 0.1);
+  color: var(--rose-coral);
+}
+
+/* ── API Documentation Layout ─────────────────────────────────────── */
+.docs-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .docs-layout {
+    grid-template-columns: 1fr;
+  }
+}
+.method-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--white);
+  text-transform: uppercase;
+}
+.method-badge.post {
+  background: var(--emerald);
+}
+
+.code-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.5rem;
+  margin-top: 0.5rem;
+}
+.code-tab-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.code-tab-btn:hover {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.03);
+}
+.code-tab-btn.active {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+
+
 
 
 
@@ -593,12 +796,34 @@ footer a:hover { color: var(--purple) !important; }
 /* ── Three-Panel Dashboard Grid Shell ────────────────────────────── */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 240px 420px 1fr;
+  grid-template-columns: 240px 1fr;
   height: calc(100vh - 64px);
   background: var(--bg);
   font-family: var(--font-body);
   overflow: hidden; /* Lock the viewport for a premium desktop-app feel */
 }
+
+.workspace-tab {
+  height: 100%;
+  width: 100%;
+  display: none;
+}
+.workspace-tab.active-tab {
+  display: block;
+}
+
+/* Playground tab uses internal grid to keep the side-by-side view */
+#workspace-playground.workspace-tab.active-tab {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  height: 100%;
+  width: 100%;
+}
+#workspace-playground.workspace-tab.active-tab .controller-panel,
+#workspace-playground.workspace-tab.active-tab .monitor-panel {
+  height: 100%;
+}
+
 
 
 .sidebar-panel {
