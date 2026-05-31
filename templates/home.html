@@ -21,6 +21,36 @@
   align-items: center;
 }
 
+.hero-bg-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+}
+
+.hero-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.16;
+  mix-blend-mode: luminosity;
+  filter: contrast(1.2) brightness(1.05) blur(2px);
+}
+
+.hero-bg-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(10, 22, 40, 0.4) 60%, #0A1628 100%);
+}
+
+.hero-bg-radial-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 20%, #0A1628 95%);
+}
+
 /* Radial glow behind hero */
 .hero-section::before {
   content: '';
@@ -784,6 +814,13 @@
 
 <!-- ── 1. Hero ──────────────────────────────────────────────────────── -->
 <section class="hero-section">
+  <!-- Radiologist Breast Scan Background -->
+  <div class="hero-bg-wrap">
+    <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=2400&q=80" alt="Radiologist Breast Imaging Review" class="hero-bg-img" />
+    <div class="hero-bg-gradient-overlay"></div>
+    <div class="hero-bg-radial-overlay"></div>
+  </div>
+
   <div class="hero-inner">
 
     <!-- Left: Copy -->
