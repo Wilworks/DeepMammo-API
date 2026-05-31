@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const pdfPreviewIframe = document.getElementById('pdfPreviewIframe') as HTMLIFrameElement | null;
   const btnDownloadFromPreview = document.getElementById('btnDownloadFromPreview') as HTMLButtonElement | null;
   const btnClosePreview = document.getElementById('btnClosePreview') as HTMLButtonElement | null;
+  const btnOpenNewTab = document.getElementById('btnOpenNewTab') as HTMLButtonElement | null;
 
   // Form controls inputs
   const modelSelect     = document.getElementById('modelSelect') as HTMLSelectElement | null;
@@ -533,6 +534,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // PDF preview overlay controls
   if (btnClosePreview) {
     btnClosePreview.addEventListener('click', () => closePdfPreview());
+  }
+  if (btnOpenNewTab) {
+    btnOpenNewTab.addEventListener('click', () => {
+      if (currentPreviewBlobUrl) {
+        window.open(currentPreviewBlobUrl, '_blank');
+      }
+    });
   }
   if (btnDownloadFromPreview) {
     btnDownloadFromPreview.addEventListener('click', () => {
