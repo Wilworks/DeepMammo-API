@@ -15,7 +15,7 @@ from reportlab.platypus import (
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 
 PAGE_W, PAGE_H = A4
-MARGIN = 1.5 * cm
+MARGIN = 1.0 * cm
 
 # ── Brand palette ─────────────────────────────────────────────────────────────
 NAVY        = colors.HexColor('#082F49')
@@ -68,7 +68,7 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     doc = SimpleDocTemplate(
         buf, pagesize=A4,
         leftMargin=MARGIN, rightMargin=MARGIN,
-        topMargin=MARGIN,  bottomMargin=MARGIN,
+        topMargin=0.8 * cm,  bottomMargin=0.8 * cm,
     )
     S = _styles()
     story = []
@@ -93,10 +93,10 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     sections = clinical_report.get('sections', {})
     t_notes  = clinical_report.get('treatment_notes', [])
 
-    AW = PAGE_W - 2 * MARGIN        # available width ≈ 17.7 cm
-    LW = 7.0 * cm                   # left column
+    AW = PAGE_W - 2 * MARGIN        # available width = 19.0 cm
+    LW = 6.6 * cm                   # left column
     GW = 0.4 * cm                   # gap
-    RW = AW - LW - GW               # right column ≈ 10.3 cm
+    RW = AW - LW - GW               # right column = 12.0 cm
 
     # ═══════════════════════════════════════════════════════════════════════════
     # 1. HEADER BAR
@@ -126,7 +126,7 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
         ('RIGHTPADDING',  (0, 0), (-1, -1), 14),
     ]))
     story.append(hdr)
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 4))
 
     # ═══════════════════════════════════════════════════════════════════════════
     # 2. URGENCY BANNER
@@ -146,7 +146,7 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
         ('RIGHTPADDING',  (0, 0), (-1, -1), 10),
     ]))
     story.append(banner)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 6))
 
     # ═══════════════════════════════════════════════════════════════════════════
     # 3. TWO-COLUMN BODY
@@ -178,7 +178,7 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
             [lbl('Patient ID'), val(p_id)],
             [lbl('Date'),       val(p_date)],
         ])],
-        [Spacer(1, 8)],
+        [Spacer(1, 4)],
     ]
 
     # Referring Physician
@@ -188,7 +188,7 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
             [lbl('Name'),     val(p_phys)],
             [lbl('Facility'), val('N/A')],
         ])],
-        [Spacer(1, 8)],
+        [Spacer(1, 4)],
     ]
 
     # Refer To
@@ -202,14 +202,14 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
                                          ParagraphStyle('uv', parent=S['info_val'],
                                                         textColor=accent))],
         ])],
-        [Spacer(1, 8)],
+        [Spacer(1, 4)],
     ]
 
     # Clinical Notes
     L += [
         [sec('CLINICAL NOTES')],
         [Paragraph(f'<i>"{p_notes}"</i>', S['notes'])],
-        [Spacer(1, 8)],
+        [Spacer(1, 4)],
     ]
 
     # Segmentation Results box
@@ -357,7 +357,7 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     R.append([Spacer(1, 4)])
 
     IW = (RW - 0.6 * cm) / 2
-    IH = IW
+    IH = 4.2 * cm
 
     def img_row(pairs):
         cells, labels = [], []
@@ -402,9 +402,9 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
         ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
     ]))
     story.append(body)
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 6))
     story.append(HRFlowable(width='100%', thickness=0.5, color=MID_GRAY))
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 4))
 
     # ═══════════════════════════════════════════════════════════════════════════
     # 4. SIGNATURE ROW
@@ -415,7 +415,7 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
     sig_left = Table(
         [
             [Paragraph('<font color="#64748B" size=7><i>RADIOLOGIST / PHYSICIAN SIGNATURE</i></font>', S['left'])],
-            [Spacer(1, 10)],
+            [Spacer(1, 4)],
             [Paragraph(f'<b>{p_phys}</b>', S['sig_name'])],
             [Paragraph('________________________', S['left'])],
             [Paragraph(f'Date: {p_date}', S['notes'])],
@@ -425,11 +425,11 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
 
     stamp = Table(
         [[Paragraph(
-            '<font color="#94A3B8" size=8>PLACE RECEIVING SPECIALIST<br/>STAMP HERE</font>',
+            '<font color="#94A3B8" size=7>PLACE RECEIVING SPECIALIST<br/>STAMP HERE</font>',
             S['center']
         )]],
         colWidths=[SRW - 0.5 * cm],
-        rowHeights=[2.8 * cm]
+        rowHeights=[2.2 * cm]
     )
     stamp.setStyle(TableStyle([
         ('BOX',           (0, 0), (-1, -1), 0.5, MID_GRAY),
@@ -453,9 +453,9 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
         ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
     ]))
     story.append(sig_row)
-    story.append(Spacer(1, 12))
+    story.append(Spacer(1, 4))
     story.append(HRFlowable(width='100%', thickness=0.5, color=MID_GRAY))
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 3))
 
     # ═══════════════════════════════════════════════════════════════════════════
     # 5. FOOTER
@@ -483,7 +483,7 @@ def build_pdf(predictions: dict, clinical_report: dict, images: dict) -> str:
         ('RIGHTPADDING',  (0, 0), (-1, -1), 0),
     ]))
     story.append(footer)
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 2))
     story.append(Paragraph(
         'This report was generated with AI assistance. It is intended to support, not replace, '
         'the clinical judgment of a qualified healthcare professional.',
