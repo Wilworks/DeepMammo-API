@@ -29,11 +29,31 @@ class PredictView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request):
+        # Pre-flight content length guard
+        content_length = request.META.get('CONTENT_LENGTH')
+        if content_length:
+            try:
+                if int(content_length) > 20 * 1024 * 1024:
+                    return Response(
+                        {'error': 'Upload size exceeds the 20MB limit. Please upload a smaller mammography specimen scan.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            except (ValueError, TypeError):
+                pass
+
         serializer = PredictRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         image_file  = serializer.validated_data['image']
+        
+        # File property guard
+        if image_file.size > 20 * 1024 * 1024:
+            return Response(
+                {'error': 'File size exceeds the 20MB limit. Please upload a smaller mammography specimen scan.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         image_bytes = image_file.read()
 
         # Optional patient info passed as JSON string in form field
@@ -68,10 +88,13 @@ class PredictView(APIView):
             }, status=status.HTTP_200_OK)
 
         except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': f'Invalid input data: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
             return Response(
-                {'error': f'Inference failed: {str(e)}'},
+                {'error': 'An unexpected error occurred during diagnostic pipeline execution. Please verify the uploaded image format and try again.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
