@@ -402,7 +402,7 @@
 
 /* ── Stats Band ────────────────────────────────────────────────────── */
 .stats-band {
-  background: var(--white);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--slate-light) 100%);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   padding: 3.5rem 2rem;
@@ -423,10 +423,10 @@
   flex-direction: column;
   padding: 1.75rem 1.5rem;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--white);
-  border-left: 4px solid var(--border);
-  transition: all 0.25s ease;
+  border: 1px solid var(--border) !important;
+  background: var(--white) !important;
+  border-left: 4px solid var(--border) !important;
+  transition: var(--transition-spring) !important;
   position: relative;
   overflow: hidden;
 }
@@ -434,16 +434,17 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, transparent 70%, rgba(8,47,73,0.03));
+  background: linear-gradient(135deg, transparent 70%, rgba(0,196,214,0.02));
   pointer-events: none;
 }
 .stat-block:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(8,47,73,0.08);
+  transform: translateY(-5px) !important;
+  box-shadow: 0 12px 30px rgba(0, 196, 214, 0.08), var(--shadow-cyan) !important;
+  border-color: rgba(0, 196, 214, 0.25) !important;
 }
-.stat-block.emerald-accent { border-left-color: #10B981; }
-.stat-block.amber-accent   { border-left-color: #EF9F27; }
-.stat-block.coral-accent   { border-left-color: #082F49; }
+.stat-block.emerald-accent { border-left-color: var(--emerald) !important; }
+.stat-block.amber-accent   { border-left-color: var(--amber) !important; }
+.stat-block.coral-accent   { border-left-color: var(--cyan) !important; }
 
 .stat-num {
   font-family: var(--font-display);
