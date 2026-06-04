@@ -1175,12 +1175,15 @@ footer a:hover { color: var(--purple) !important; }
 }
 
 .sidebar-panel {
-  background: linear-gradient(180deg, var(--surface-1) 0%, var(--deep-bg) 100%);
+  background: var(--glass-bg-dark) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
   color: var(--text-white);
   padding: 2.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--border-dark);
+  border-right: 1px solid var(--glass-border-dark) !important;
+  box-shadow: var(--glass-shadow) !important;
 }
 
 .brand-header h2 {
@@ -1220,8 +1223,9 @@ footer a:hover { color: var(--purple) !important; }
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-white) !important;
+  transform: translateX(4px);
 }
 
 .nav-item:hover svg {
@@ -1229,10 +1233,11 @@ footer a:hover { color: var(--purple) !important; }
 }
 
 .nav-item.active {
-  background: rgba(0, 196, 214, 0.1);
+  background: rgba(0, 196, 214, 0.12) !important;
   color: var(--cyan) !important;
   border-left-color: var(--cyan);
-  box-shadow: inset 0 1px 0 rgba(0, 196, 214, 0.05);
+  box-shadow: inset 0 1px 0 rgba(0, 196, 214, 0.08), 0 0 12px rgba(0, 196, 214, 0.1);
+  text-shadow: 0 0 8px rgba(0, 196, 214, 0.25);
 }
 
 .nav-item.active svg {
