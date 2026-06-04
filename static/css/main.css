@@ -970,9 +970,26 @@ footer a:hover { color: var(--purple) !important; }
   display: grid;
   grid-template-columns: 240px 1fr;
   height: calc(100vh - 64px);
-  background: var(--bg);
+  background: var(--deep-bg);
+  color: var(--text-white);
   font-family: var(--font-body);
   overflow: hidden; /* Lock the viewport for a premium desktop-app feel */
+}
+
+/* Typographic overrides for dark theme dashboard */
+.dashboard-grid h1,
+.dashboard-grid h2,
+.dashboard-grid h3,
+.dashboard-grid h4,
+.dashboard-grid h5,
+.dashboard-grid h6 {
+  color: var(--text-white) !important;
+}
+
+.dashboard-grid .sub,
+.dashboard-grid p,
+.dashboard-grid span:not(.triage-pill):not(.file-name) {
+  color: var(--text-muted);
 }
 
 .workspace-tab {
@@ -999,15 +1016,13 @@ footer a:hover { color: var(--purple) !important; }
   height: 100%;
 }
 
-
-
 .sidebar-panel {
-  background: var(--brand-navy);
-  color: var(--white);
+  background: linear-gradient(180deg, var(--surface-1) 0%, var(--deep-bg) 100%);
+  color: var(--text-white);
   padding: 2.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255,255,255,0.05);
+  border-right: 1px solid var(--border-dark);
 }
 
 .brand-header h2 {
@@ -1015,7 +1030,7 @@ footer a:hover { color: var(--purple) !important; }
   font-size: 1.4rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--white) 30%, rgba(255,255,255,0.7) 100%);
+  background: linear-gradient(135deg, var(--text-white) 30%, var(--text-muted) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -1033,11 +1048,12 @@ footer a:hover { color: var(--purple) !important; }
   gap: 12px;
   padding: 0.8rem 1rem;
   border-radius: var(--radius);
-  color: rgba(255, 255, 255, 0.6) !important;
+  color: var(--text-muted) !important;
   font-size: 0.9rem;
   font-weight: 600;
   transition: var(--transition);
   text-decoration: none !important;
+  border-left: 3px solid transparent;
 }
 
 .nav-item svg {
@@ -1046,8 +1062,8 @@ footer a:hover { color: var(--purple) !important; }
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--white) !important;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-white) !important;
 }
 
 .nav-item:hover svg {
@@ -1055,31 +1071,30 @@ footer a:hover { color: var(--purple) !important; }
 }
 
 .nav-item.active {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--white) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: rgba(0, 196, 214, 0.1);
+  color: var(--cyan) !important;
+  border-left-color: var(--cyan);
+  box-shadow: inset 0 1px 0 rgba(0, 196, 214, 0.05);
 }
 
 .nav-item.active svg {
   opacity: 1;
-  color: var(--emerald);
+  color: var(--cyan);
 }
 
-
 .controller-panel {
-  background-color: var(--slate-light);
-  background-image: radial-gradient(#E2E8F0 1.5px, transparent 1.5px);
+  background-color: var(--deep-bg);
+  background-image: radial-gradient(rgba(0, 196, 214, 0.06) 1.5px, transparent 1.5px);
   background-size: 24px 24px;
   padding: 2.5rem 2rem;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--border-dark);
   overflow-y: auto;
   min-height: 0;
   height: 100%;
 }
 
-
 .monitor-panel {
-  background: var(--white);
+  background: var(--surface-1);
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -1087,6 +1102,22 @@ footer a:hover { color: var(--purple) !important; }
   overflow-y: auto;
   min-height: 0;
   height: 100%;
+  border-left: 1px solid var(--border-dark);
+}
+
+/* Auto-adapt cards in dashboard to clinical dark glass style */
+.dashboard-grid .card {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border-dark) !important;
+  box-shadow: var(--glass-shadow) !important;
+  color: var(--text-white) !important;
+  transition: var(--transition-spring);
+}
+.dashboard-grid .card:hover {
+  background: var(--surface-3) !important;
+  border-color: rgba(0, 196, 214, 0.25) !important;
+  box-shadow: var(--glass-shadow-cyan) !important;
+  transform: translateY(-2px);
 }
 
 @media (max-width: 1024px) {
@@ -1110,11 +1141,14 @@ footer a:hover { color: var(--purple) !important; }
   }
   .sidebar-panel {
     border-right: none;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border-dark);
   }
   .controller-panel {
     border-right: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-dark);
+  }
+  .monitor-panel {
+    border-left: none;
   }
 }
 
