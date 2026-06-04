@@ -686,6 +686,9 @@ main { flex: 1; }
   background: var(--white);
   margin-top: 1rem;
 }
+.dashboard-grid .chart-container {
+  background: transparent !important;
+}
 .vector-chart {
   width: 100%;
   height: 200px;
