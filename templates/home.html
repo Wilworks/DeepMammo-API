@@ -854,11 +854,13 @@
 
 /* ── CTA Band ──────────────────────────────────────────────────────── */
 .cta-section {
-  background: linear-gradient(135deg, #082F49 0%, #0A1628 100%);
+  background: var(--dark-accent) !important;
   padding: 5.5rem 2rem;
   text-align: center;
   position: relative;
   overflow: hidden;
+  --x: 50%;
+  --y: 50%;
 }
 /* Circuit pattern overlay */
 .cta-section::before {
@@ -866,19 +868,16 @@
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(circle, rgba(16,185,129,0.06) 1px, transparent 1px);
+    radial-gradient(circle, rgba(0, 196, 214, 0.05) 1px, transparent 1px);
   background-size: 36px 36px;
   pointer-events: none;
 }
+/* Interactive spotlight */
 .cta-section::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 600px;
-  height: 400px;
-  background: radial-gradient(ellipse, rgba(16,185,129,0.08) 0%, transparent 65%);
+  inset: 0;
+  background: radial-gradient(circle 350px at var(--x) var(--y), rgba(0, 196, 214, 0.12) 0%, transparent 80%) !important;
   pointer-events: none;
 }
 .cta-inner {
@@ -1302,6 +1301,18 @@
     });
   }, { threshold: 0.15 });
   bentoCards.forEach(card => bentoObs.observe(card));
+
+  // ── Mouse spotlight for CTA section ─────────────────────────────────
+  const ctaSection = document.querySelector('.cta-section');
+  if (ctaSection) {
+    ctaSection.addEventListener('mousemove', e => {
+      const rect = ctaSection.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ctaSection.style.setProperty('--x', `${x}px`);
+      ctaSection.style.setProperty('--y', `${y}px`);
+    });
+  }
 })();
 </script>
 
