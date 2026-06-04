@@ -722,59 +722,134 @@
   background: var(--white);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 5rem 2rem;
+  padding: 5.5rem 2rem;
 }
 .accuracy-inner {
   max-width: 1000px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  gap: 4rem;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 5rem;
   align-items: center;
 }
-@media (max-width: 720px) {
-  .accuracy-inner { grid-template-columns: 1fr; gap: 2rem; }
+@media (max-width: 860px) {
+  .accuracy-inner { grid-template-columns: 1fr; gap: 3rem; }
 }
+
+.accuracy-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.accuracy-metric-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.progress-ring-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.progress-ring {
+  transform: rotate(-90deg);
+}
+.progress-ring-bg {
+  fill: none;
+  stroke: rgba(0, 196, 214, 0.06);
+}
+.progress-ring-circle {
+  fill: none;
+  transition: stroke-dashoffset 1.8s var(--ease-smooth);
+  stroke-linecap: round;
+}
+
+.progress-ring-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
 .accuracy-big-num {
   font-family: var(--font-display);
-  font-size: clamp(4rem, 9vw, 6.5rem);
+  font-size: 2.5rem;
   font-weight: 800;
   color: var(--brand-navy);
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
 }
-.accuracy-big-num span {
-  font-size: 2.5rem;
-  color: #10B981;
-}
+
 .accuracy-big-label {
-  font-size: 0.8rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-light);
-  margin-top: 0.5rem;
+  margin-top: 4px;
 }
-.accuracy-copy .section-title { font-size: 1.6rem; }
+
+.secondary-metrics {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.secondary-metrics .progress-ring-bg {
+  stroke: rgba(0, 0, 0, 0.04);
+}
+
+.mini-num {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  line-height: 1;
+}
+
+.mini-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.accuracy-copy .section-title { font-size: 1.8rem; margin-bottom: 1rem; }
 .accuracy-copy p {
   color: var(--text-mid);
   font-size: 0.95rem;
   line-height: 1.8;
   margin-bottom: 1.25rem;
 }
+
 .peer-reviewed-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #10B981;
-  background: rgba(16,185,129,0.08);
-  border: 1px solid rgba(16,185,129,0.2);
+  color: var(--emerald);
+  background: var(--emerald-glow);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   padding: 0.4rem 0.9rem;
   border-radius: 8px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  animation: badge-pulse 2.5s infinite ease-in-out;
+}
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.2); }
+  50% { box-shadow: 0 0 12px 4px rgba(16, 185, 129, 0.15); }
 }
 
 /* ── CTA Band ──────────────────────────────────────────────────────── */
@@ -1084,8 +1159,44 @@
 <section class="accuracy-section">
   <div class="accuracy-inner">
     <div class="accuracy-left">
-      <div class="accuracy-big-num">94.7<span>%</span></div>
-      <div class="accuracy-big-label">Pathology Accuracy</div>
+      <!-- Central large accuracy metric -->
+      <div class="accuracy-metric-container">
+        <div class="progress-ring-wrap">
+          <svg class="progress-ring" width="160" height="160">
+            <circle class="progress-ring-bg" cx="80" cy="80" r="70" stroke-width="8"></circle>
+            <circle class="progress-ring-circle" cx="80" cy="80" r="70" stroke-width="8" stroke="var(--cyan)" data-stroke-percent="94.7"></circle>
+          </svg>
+          <div class="progress-ring-content">
+            <span class="accuracy-big-num" data-count="94.7" data-decimals="1" data-suffix="%">0.0%</span>
+            <span class="accuracy-big-label">Pathology Accuracy</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Secondary stats rings row -->
+      <div class="secondary-metrics mt-3">
+        <div class="progress-ring-wrap">
+          <svg class="progress-ring" width="90" height="90">
+            <circle class="progress-ring-bg" cx="45" cy="45" r="38" stroke-width="4"></circle>
+            <circle class="progress-ring-circle" cx="45" cy="45" r="38" stroke-width="4" stroke="var(--emerald)" data-stroke-percent="96.2"></circle>
+          </svg>
+          <div class="progress-ring-content">
+            <span class="mini-num" data-count="0.96" data-decimals="2" data-prefix="AUC ">0.00</span>
+            <span class="mini-label">Abnormality</span>
+          </div>
+        </div>
+        
+        <div class="progress-ring-wrap">
+          <svg class="progress-ring" width="90" height="90">
+            <circle class="progress-ring-bg" cx="45" cy="45" r="38" stroke-width="4"></circle>
+            <circle class="progress-ring-circle" cx="45" cy="45" r="38" stroke-width="4" stroke="var(--sky)" data-stroke-percent="78.0"></circle>
+          </svg>
+          <div class="progress-ring-content">
+            <span class="mini-num" data-count="0.78" data-decimals="2" data-prefix="Dice ">0.00</span>
+            <span class="mini-label">Segmentation</span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="accuracy-copy">
       <span class="section-eyebrow">Model Performance</span>
@@ -1125,21 +1236,37 @@
 <!-- Count-up & bento animation script -->
 <script>
 (function() {
-  // ── Count-up on scroll ──────────────────────────────────────────
+  // ── Count-up on scroll (Decimal and Integer support) ──────────────────
   function animateCount(el) {
-    const target  = parseInt(el.getAttribute('data-count'), 10);
-    const prefix  = el.getAttribute('data-prefix') || '';
-    const suffix  = el.getAttribute('data-suffix') || '';
+    const target = parseFloat(el.getAttribute('data-count'));
+    const decimals = parseInt(el.getAttribute('data-decimals'), 10) || 0;
+    const prefix = el.getAttribute('data-prefix') || '';
+    const suffix = el.getAttribute('data-suffix') || '';
     const duration = 1400;
-    const start    = performance.now();
+    const start = performance.now();
     function step(now) {
       const pct = Math.min((now - start) / duration, 1);
       const ease = 1 - Math.pow(1 - pct, 3); // ease-out cubic
-      const val  = Math.round(ease * target);
+      const val = (ease * target).toFixed(decimals);
       el.textContent = prefix + val + suffix;
       if (pct < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
+  }
+
+  // ── Progress Ring SVG Circle Animation ──────────────────────────────
+  function animateProgressRing(circle) {
+    const r = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * r;
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = circumference;
+    
+    const pct = parseFloat(circle.getAttribute('data-stroke-percent'));
+    const offset = circumference - (pct / 100) * circumference;
+    
+    setTimeout(() => {
+      circle.style.strokeDashoffset = offset;
+    }, 150);
   }
 
   const countEls = document.querySelectorAll('[data-count]');
@@ -1150,8 +1277,19 @@
         observer.unobserve(e.target);
       }
     });
-  }, { threshold: 0.4 });
+  }, { threshold: 0.2 });
   countEls.forEach(el => observer.observe(el));
+
+  const ringCircles = document.querySelectorAll('.progress-ring-circle');
+  const ringObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        animateProgressRing(e.target);
+        ringObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  ringCircles.forEach(el => ringObserver.observe(el));
 
   // ── Bento stagger fade-in ────────────────────────────────────────
   const bentoCards = document.querySelectorAll('.bento-card');
