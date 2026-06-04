@@ -415,6 +415,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const seg  = data.segmentation;
     const rep  = data.clinical_report;
 
+    // Add glow classes based on prediction labels
+    const abnCard = document.getElementById('abnCard');
+    const pathCard = document.getElementById('pathCard');
+
+    if (abnCard) {
+      abnCard.classList.remove('glow-mass', 'glow-calcification');
+      if (abn.label.toLowerCase() === 'mass') {
+        abnCard.classList.add('glow-mass');
+      } else if (abn.label.toLowerCase() === 'calcification') {
+        abnCard.classList.add('glow-calcification');
+      }
+    }
+
+    if (pathCard) {
+      pathCard.classList.remove('glow-benign', 'glow-malignant');
+      if (path.label.toLowerCase() === 'benign') {
+        pathCard.classList.add('glow-benign');
+      } else if (path.label.toLowerCase() === 'malignant') {
+        pathCard.classList.add('glow-malignant');
+      }
+    }
+
     setLabel('abnLabel', abn.label, `badge-${abn.label}`);
     
     const abnConfEl = document.getElementById('abnConf');
@@ -658,6 +680,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (jsonOutput) {
       jsonOutput.textContent = '{\n  "status": "200 OK",\n  "waiting": "API Request has not been sent yet."\n}';
     }
+    const abnCard = document.getElementById('abnCard');
+    const pathCard = document.getElementById('pathCard');
+    if (abnCard) {
+      abnCard.classList.remove('glow-mass', 'glow-calcification');
+    }
+    if (pathCard) {
+      pathCard.classList.remove('glow-benign', 'glow-malignant');
+    }
     clearLoadingAnimation();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -873,7 +903,11 @@ fetch("http://127.0.0.1:8000/api/predict/", {
     const el = document.getElementById(id);
     if (el) {
       el.textContent = text.charAt(0).toUpperCase() + text.slice(1);
-      el.className = `badge ${cls}`;
+      let classList = `badge ${cls}`;
+      if (text.toLowerCase() === 'malignant') {
+        classList += ' badge-malignant-pulse';
+      }
+      el.className = classList;
     }
   }
 

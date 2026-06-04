@@ -1320,3 +1320,35 @@ footer a:hover { color: var(--purple) !important; }
   }
 }
 
+/* ── Pathology & Abnormality Glow Cards ───────────────────────────── */
+.result-block {
+  transition: var(--transition-spring) !important;
+  border-left: 4px solid transparent !important;
+}
+.result-block.glow-benign {
+  border-left-color: var(--emerald) !important;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.12), var(--glass-shadow) !important;
+}
+.result-block.glow-malignant {
+  border-left-color: var(--rose-coral) !important;
+  box-shadow: 0 8px 32px rgba(216, 90, 48, 0.18), var(--glass-shadow) !important;
+}
+.result-block.glow-mass {
+  border-left-color: var(--amber) !important;
+  box-shadow: 0 8px 32px rgba(239, 159, 39, 0.12), var(--glass-shadow) !important;
+}
+.result-block.glow-calcification {
+  border-left-color: var(--cyan) !important;
+  box-shadow: 0 8px 32px rgba(0, 196, 214, 0.12), var(--glass-shadow) !important;
+}
+
+/* Pulsing Malignant Badge Glow */
+.badge-malignant-pulse {
+  animation: badgeMalignantPulse 2s infinite !important;
+}
+@keyframes badgeMalignantPulse {
+  0% { box-shadow: 0 0 0 0 rgba(216, 90, 48, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(216, 90, 48, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(216, 90, 48, 0); }
+}
+
