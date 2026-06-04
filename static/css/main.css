@@ -949,7 +949,7 @@ footer a:hover { color: var(--purple) !important; }
 .report-section {
   border-left: 3px solid var(--purple);
   padding: 0.5rem 0 0.5rem 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 .report-section h4 {
   font-size: 0.8rem;
@@ -957,11 +957,32 @@ footer a:hover { color: var(--purple) !important; }
   letter-spacing: 0.05em;
   color: var(--purple);
   margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .report-section p {
   font-size: 0.88rem;
   color: var(--text-dark);
   line-height: 1.7;
+}
+.report-icon {
+  color: inherit;
+  flex-shrink: 0;
+}
+
+/* Dark mode dashboard overrides */
+.dashboard-grid .report-section {
+  border-left-color: var(--cyan) !important;
+}
+.dashboard-grid .report-section h4 {
+  color: var(--cyan) !important;
+}
+.dashboard-grid .report-section p {
+  color: var(--text-white) !important;
+}
+.dashboard-grid .report-icon {
+  color: var(--cyan) !important;
 }
 
 /* ── Section headings ─────────────────────────────────────────────── */
