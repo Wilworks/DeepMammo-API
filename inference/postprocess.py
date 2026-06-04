@@ -68,13 +68,13 @@ def decode_segmentation(seg_logits: np.ndarray, original_size: tuple) -> dict:
 
 def build_overlay(original_image: np.ndarray, mask_array: np.ndarray) -> str:
     """
-    Blends the segmentation mask (red tint) onto the original image.
+    Blends the segmentation mask (sky-blue tint) onto the original image.
     Returns base64 PNG string.
     """
     overlay = original_image.copy()
-    # Where mask is white (255), tint red
-    overlay[mask_array == 255] = [255, 80, 80]
-    blended = cv2.addWeighted(original_image, 0.6, overlay, 0.4, 0)
+    # Where mask is white (255), tint sky-blue
+    overlay[mask_array == 255] = [56, 189, 248]
+    blended = cv2.addWeighted(original_image, 0.65, overlay, 0.35, 0)
     return _array_to_b64(blended)
 
 
