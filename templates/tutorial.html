@@ -3,37 +3,120 @@
 
 {% block extra_css %}
 <style>
-.tutorial { max-width: 760px; margin: 0 auto; padding: 3rem 2rem; }
-.tutorial h1 { font-size: 1.7rem; font-weight: 700; margin-bottom: 0.25rem; }
-.tutorial .sub { color: var(--text-light); font-size: 0.9rem; margin-bottom: 2.5rem; }
-.step-card { display: flex; gap: 1.25rem; margin-bottom: 1.5rem; }
-.step-card .step-num {
-  width: 40px; height: 40px; min-width: 40px;
-  background: var(--purple); color: white;
-  border-radius: 50%; font-weight: 700; font-size: 1rem;
-  display: flex; align-items: center; justify-content: center;
-}
-.step-card .step-body h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
-.step-card .step-body p  { font-size: 0.88rem; color: var(--text-mid); line-height: 1.65; }
-.tip-box {
-  background: var(--purple-light);
-  border-left: 3px solid var(--purple);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 1rem 1.25rem;
-  font-size: 0.88rem;
-  color: var(--text-dark);
-  margin-top: 2rem;
-}
-.tip-box strong { color: var(--purple); }
+  .tutorial {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 4.5rem 2rem;
+  }
+
+  .tutorial h1 {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
+  }
+
+  .tutorial .sub {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    margin-bottom: 3rem;
+  }
+
+  .step-card {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--glass-bg-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    backdrop-filter: var(--glass-blur-sm);
+    box-shadow: var(--shadow);
+    transition: var(--transition-spring);
+  }
+
+  .step-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 196, 214, 0.35);
+    box-shadow: var(--shadow-cyan);
+  }
+
+  .step-card .step-num {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    background: linear-gradient(135deg, var(--brand-navy) 0%, var(--surface-2) 100%) !important;
+    color: var(--text-white) !important;
+    border-radius: 12px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(8, 47, 73, 0.15);
+    transition: all var(--dur-normal) var(--ease-spring);
+  }
+
+  .step-card:hover .step-num {
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--sky) 100%) !important;
+    box-shadow: 0 0 15px var(--cyan-glow), 0 4px 12px rgba(0, 196, 214, 0.25) !important;
+    color: var(--text-dark) !important;
+  }
+
+  .step-card .step-body h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.4rem;
+  }
+
+  .step-card .step-body p {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+  }
+
+  .step-card .step-body p a {
+    color: var(--cyan-deep);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1.5px solid transparent;
+    transition: var(--transition);
+  }
+
+  .step-card .step-body p a:hover {
+    border-color: var(--cyan-deep);
+  }
+
+  .tip-box {
+    background: var(--rose-glow) !important;
+    border-left: 4px solid var(--rose-coral) !important;
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    margin-top: 2.5rem;
+    box-shadow: var(--shadow);
+    line-height: 1.65;
+  }
+
+  .tip-box strong {
+    color: var(--rose-coral) !important;
+    font-weight: 800;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="tutorial">
-  <h1>How to Use DeepMammo</h1>
-  <p class="sub">A step-by-step guide to making predictions</p>
+  <h1 class="reveal">How to Use DeepMammo</h1>
+  <p class="sub reveal" style="--reveal-delay: 80ms;">A step-by-step guide to making predictions</p>
 
-  <div class="step-card">
+  <div class="step-card reveal reveal--scale" style="--reveal-delay: 150ms;">
     <div class="step-num">1</div>
     <div class="step-body">
       <h3>Prepare your image</h3>
@@ -41,7 +124,7 @@
     </div>
   </div>
 
-  <div class="step-card">
+  <div class="step-card reveal reveal--scale" style="--reveal-delay: 200ms;">
     <div class="step-num">2</div>
     <div class="step-body">
       <h3>Upload on the Dashboard</h3>
@@ -49,7 +132,7 @@
     </div>
   </div>
 
-  <div class="step-card">
+  <div class="step-card reveal reveal--scale" style="--reveal-delay: 250ms;">
     <div class="step-num">3</div>
     <div class="step-body">
       <h3>Run the analysis</h3>
@@ -57,7 +140,7 @@
     </div>
   </div>
 
-  <div class="step-card">
+  <div class="step-card reveal reveal--scale" style="--reveal-delay: 300ms;">
     <div class="step-num">4</div>
     <div class="step-body">
       <h3>Review the results</h3>
@@ -65,7 +148,7 @@
     </div>
   </div>
 
-  <div class="step-card">
+  <div class="step-card reveal reveal--scale" style="--reveal-delay: 350ms;">
     <div class="step-num">5</div>
     <div class="step-body">
       <h3>Download the PDF report</h3>
@@ -73,7 +156,7 @@
     </div>
   </div>
 
-  <div class="tip-box">
+  <div class="tip-box reveal reveal--scale" style="--reveal-delay: 400ms;">
     <strong>Important:</strong> DeepMammo is an AI-assisted research tool.
     All results must be reviewed and verified by a qualified radiologist before
     any clinical decision is made. This tool does not replace professional medical diagnosis.

@@ -4,41 +4,54 @@
 {% block extra_css %}
 <style>
   .faq {
-    max-width: 760px;
+    max-width: 780px;
     margin: 0 auto;
-    padding: 3rem 2rem;
+    padding: 4.5rem 2rem;
   }
 
   .faq h1 {
-    font-size: 1.7rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
   }
 
   .faq .sub {
     color: var(--text-light);
-    font-size: 0.9rem;
-    margin-bottom: 2.5rem;
+    font-size: 0.95rem;
+    margin-bottom: 3rem;
   }
 
   details {
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: var(--white);
-    margin-bottom: 0.75rem;
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-sm);
+    box-shadow: var(--shadow);
+    margin-bottom: 0.85rem;
     overflow: hidden;
+    transition: var(--transition-spring);
+  }
+
+  details:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 196, 214, 0.35);
+    box-shadow: var(--shadow-cyan);
   }
 
   summary {
-    padding: 1rem 1.25rem;
-    font-weight: 600;
-    font-size: 0.93rem;
+    padding: 1.2rem 1.5rem;
+    font-weight: 700;
+    font-size: 0.98rem;
     cursor: pointer;
     list-style: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: var(--text-dark);
+    transition: color var(--dur-fast) var(--ease-smooth);
   }
 
   summary::-webkit-details-marker {
@@ -46,35 +59,51 @@
   }
 
   summary::after {
-    content: '+';
-    font-size: 1.2rem;
-    color: var(--purple);
-    transition: transform 0.2s;
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2300c4d6' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M12 4.5v15m7.5-7.5h-15'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: transform var(--dur-normal) var(--ease-spring);
   }
 
   details[open] summary::after {
-    content: '−';
+    transform: rotate(45deg);
+  }
+
+  details[open] {
+    border-color: rgba(0, 196, 214, 0.4);
+    background: var(--white);
+    box-shadow: var(--shadow-cyan);
   }
 
   details[open] summary {
-    color: var(--purple);
+    color: var(--cyan-deep);
   }
 
   .faq-body {
-    padding: 0 1.25rem 1.1rem;
-    font-size: 0.88rem;
+    padding: 0 1.5rem 1.25rem;
+    font-size: 0.9rem;
     color: var(--text-mid);
-    line-height: 1.7;
+    line-height: 1.75;
+    animation: faqSlideDown var(--dur-normal) var(--ease-out) forwards;
+  }
+
+  @keyframes faqSlideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="faq">
-  <h1>Frequently Asked Questions</h1>
-  <p class="sub">Everything you need to know about DeepMammo</p>
+  <h1 class="reveal">Frequently Asked Questions</h1>
+  <p class="sub reveal" style="--reveal-delay: 80ms;">Everything you need to know about DeepMammo</p>
 
-  <details>
+  <details class="reveal reveal--scale" style="--reveal-delay: 150ms;">
     <summary>What image formats does DeepMammo accept?</summary>
     <div class="faq-body">
       DeepMammo currently accepts PNG and JPG/JPEG images up to 20 MB. DICOM files (.dcm) should be converted to PNG
@@ -82,7 +111,7 @@
     </div>
   </details>
 
-  <details>
+  <details class="reveal reveal--scale" style="--reveal-delay: 200ms;">
     <summary>How accurate is the model?</summary>
     <div class="faq-body">
       DeepMammo was trained on 45,304 augmented images from the CBIS-DDSM and INbreast datasets. The model uses
@@ -91,7 +120,7 @@
     </div>
   </details>
 
-  <details>
+  <details class="reveal reveal--scale" style="--reveal-delay: 250ms;">
     <summary>What do the two classification outputs mean?</summary>
     <div class="faq-body">
       <strong>Abnormality type</strong> tells you what kind of finding is present: a <em>mass</em> (a solid lump) or
@@ -100,7 +129,7 @@
     </div>
   </details>
 
-  <details>
+  <details class="reveal reveal--scale" style="--reveal-delay: 300ms;">
     <summary>What is the segmentation mask?</summary>
     <div class="faq-body">
       The segmentation head of the model predicts a pixel-level binary mask highlighting the abnormal region in the
@@ -109,7 +138,7 @@
     </div>
   </details>
 
-  <details>
+  <details class="reveal reveal--scale" style="--reveal-delay: 350ms;">
     <summary>What is the saliency map (GradCAM)?</summary>
     <div class="faq-body">
       The saliency map shows where the model is paying attention. A jet colormap (blue → red) is used — red areas have
@@ -118,7 +147,7 @@
     </div>
   </details>
 
-  <details>
+  <details class="reveal reveal--scale" style="--reveal-delay: 400ms;">
     <summary>Who generates the clinical report?</summary>
     <div class="faq-body">
       The clinical report is generated by a large language model (Llama 3 70B via Groq) using the model's structured
@@ -127,7 +156,7 @@
     </div>
   </details>
 
-  <details>
+  <details class="reveal reveal--scale" style="--reveal-delay: 450ms;">
     <summary>Can I use this for real clinical diagnosis?</summary>
     <div class="faq-body">
       No. DeepMammo is a research and demonstration tool. It has not been approved for clinical use, has not undergone
@@ -136,7 +165,7 @@
     </div>
   </details>
 
-  <details>
+  <details class="reveal reveal--scale" style="--reveal-delay: 500ms;">
     <summary>Is my uploaded image stored?</summary>
     <div class="faq-body">
       No. Images are processed in memory and not saved to disk or any database. Once the response is returned, the image
