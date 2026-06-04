@@ -10,6 +10,10 @@
     /* Hard reset for HF Spaces iframe interference */
     body { margin: 0 !important; padding: 0 !important; }
     ul   { list-style: none !important; padding: 0 !important; margin: 0 !important; }
+    /* Compensate for fixed floating nav */
+    main { padding-top: 88px !important; }
+    /* Dashboard overrides the padding since it controls its own layout */
+    .dashboard-grid + * { padding-top: 0 !important; }
     .modal-overlay {
       position: fixed !important; inset: 0 !important;
       background: rgba(26,26,46,0.6) !important;
@@ -25,7 +29,7 @@
 </head>
 <body>
 
-  <nav class="navbar">
+  <nav class="navbar" id="mainNav">
     <a href="/" class="navbar-brand">
       <span class="logo-dot"></span>
       DeepMammo
@@ -37,6 +41,15 @@
       <li><a href="/faq"      {% if request.resolver_match.url_name == 'faq'       %}class="active"{% endif %}>FAQ</a></li>
     </ul>
   </nav>
+  <script>
+    (function(){
+      var nav = document.getElementById('mainNav');
+      if (!nav) return;
+      window.addEventListener('scroll', function(){
+        nav.classList.toggle('scrolled', window.scrollY > 30);
+      }, { passive: true });
+    })();
+  </script>
 
   <main>{% block content %}{% endblock %}</main>
 
