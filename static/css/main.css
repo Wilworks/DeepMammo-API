@@ -1390,3 +1390,59 @@ footer a:hover { color: var(--purple) !important; }
   100% { box-shadow: 0 0 0 0 rgba(216, 90, 48, 0); }
 }
 
+/* ── Download Bar — Premium Glass Surface ───────────────────────── */
+.download-bar {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--glass-bg-dark) !important;
+  border: 1px solid var(--glass-border-dark) !important;
+  border-radius: var(--radius-lg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  box-shadow: var(--glass-shadow) !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.download-bar strong {
+  font-family: var(--font-display);
+  color: var(--text-white) !important;
+  font-size: 0.95rem;
+}
+.download-bar p {
+  color: var(--text-muted) !important;
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+/* Shimmer CTA Button Upgrade */
+.shimmer-cta {
+  background: linear-gradient(90deg, var(--cyan), #00A6B4, var(--cyan)) !important;
+  background-size: 200% auto !important;
+  color: var(--brand-navy) !important;
+  font-weight: 800 !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(0, 196, 214, 0.35) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: var(--transition) !important;
+}
+.shimmer-cta:hover:not(:disabled) {
+  animation: shimmer 1.5s infinite linear !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 4px 20px rgba(0, 196, 214, 0.5) !important;
+}
+.shimmer-cta svg {
+  color: var(--brand-navy) !important;
+}
+.dashboard-grid .btn-outline {
+  border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+  color: var(--text-white) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+.dashboard-grid .btn-outline:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
