@@ -346,8 +346,16 @@
           </div>
         </div>
 
-        <div style="margin-top:.75rem;font-size:.82rem;color:var(--text-light);">
-          Region coverage: <strong id="coverage"></strong> of image area
+        <div style="margin-top:.75rem;font-size:.82rem;color:var(--text-light); display:flex; align-items:center; gap:8px;">
+          <span>Region coverage:</span>
+          <strong id="coverage"></strong>
+          <span>of image area</span>
+          <div class="progress-ring-wrap" style="width: 18px; height: 18px;">
+            <svg class="progress-ring" width="18" height="18">
+              <circle class="progress-ring-bg" stroke="rgba(255, 255, 255, 0.1)" stroke-width="2" fill="transparent" r="7" cx="9" cy="9"/>
+              <circle class="progress-ring-circle" id="coverageRing" stroke="var(--cyan)" stroke-width="2" fill="transparent" r="7" cx="9" cy="9" stroke-dasharray="44" stroke-dashoffset="44"/>
+            </svg>
+          </div>
         </div>
       </div>
 

@@ -500,6 +500,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const coverage = document.getElementById('coverage');
     if (coverage) coverage.textContent = `${seg.coverage_pct}%`;
 
+    const coverageRing = document.getElementById('coverageRing') as SVGCircleElement | null;
+    if (coverageRing) {
+      const pctValue = seg.coverage_pct;
+      const offset = 44 - (44 * pctValue) / 100;
+      coverageRing.style.strokeDashoffset = offset.toString();
+    }
+
     const sectionTitles: Record<string, string> = {
       'clinical indication': 'Clinical Indication',
       'technique': 'Technique',
@@ -719,6 +726,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pathBarFill) {
       pathBarFill.className = 'confidence-bar-fill';
       pathBarFill.style.width = '0%';
+    }
+    const coverageRing = document.getElementById('coverageRing') as SVGCircleElement | null;
+    if (coverageRing) {
+      coverageRing.style.strokeDashoffset = '44';
     }
     clearLoadingAnimation();
     window.scrollTo({ top: 0, behavior: 'smooth' });
