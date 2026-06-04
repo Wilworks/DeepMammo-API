@@ -1,38 +1,112 @@
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
 /* ── Reset & Base ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  /* Legacy/Base compatibility tokens */
-  --purple:       #082F49; /* Maps brand header to primary navy */
-  --purple-light: #F1F5F9;
-  --purple-dark:  #0A1628;
-  --text-dark:    #0A1628;
-  --text-mid:     #475569;
-  --text-light:   #64748B;
-  --border:       #E2E8F0;
-  --white:        #ffffff;
-  --bg:           #F8FAFC;
-  --success:      #10B981;
-  --danger:       #D85A30;
-  --radius:       12px;
-  --shadow:       0 4px 20px rgba(10, 22, 40, 0.05), 0 1px 3px rgba(10, 22, 40, 0.01);
-  --transition:   all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+/* ── Reduced motion guard ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
-  /* DermaDefect / Clinical Tech Tokens */
+:root {
+  /* ── Brand Palette ── */
   --brand-navy:    #082F49;
   --dark-accent:   #0A1628;
-  --slate-light:   #F8FAFC;
+  --deep-bg:       #040F1E;       /* OLED deep navy — dashboard background */
+  --surface-1:     #061829;       /* Card/panel surface */
+  --surface-2:     #0A2340;       /* Elevated surface */
+  --surface-3:     #0F2D50;       /* Hover surface */
+
+  /* ── Blue × Cyan Clinical Accent ── */
+  --cyan:          #00C4D6;       /* Primary cyan */
+  --cyan-deep:     #0097A7;       /* Darker cyan for text */
+  --cyan-glow:     rgba(0, 196, 214, 0.18);
+  --sky:           #38BDF8;       /* Sky blue secondary */
+  --sky-glow:      rgba(56, 189, 248, 0.15);
+
+  /* ── Semantic colours ── */
   --emerald:       #10B981;
+  --emerald-glow:  rgba(16, 185, 129, 0.15);
   --amber:         #EF9F27;
   --rose-coral:    #D85A30;
-  --charcoal-code: #0F172A;
+  --rose-glow:     rgba(216, 90, 48, 0.18);
 
-  /* Typography System */
+  /* ── Light surface palette (homepage, public pages) ── */
+  --white:        #ffffff;
+  --bg:           #F8FAFC;
+  --slate-light:  #F1F7FF;       /* Slight blue tint on light bg */
+  --border:       #DDE8F5;       /* Blue-tinted border */
+  --border-dark:  rgba(255, 255, 255, 0.08);
+
+  /* ── Text ── */
+  --text-dark:    #0A1628;
+  --text-mid:     #3D5474;
+  --text-light:   #6B88A8;
+  --text-white:   #F0F8FF;
+  --text-muted:   #8BA3BE;
+
+  /* ── Legacy compat ── */
+  --purple:       #082F49;
+  --purple-light: #EDF4FF;
+  --purple-dark:  #0A1628;
+  --charcoal-code: #040F1E;
+
+  /* ── Glassmorphism tokens ── */
+  --glass-bg-light:  rgba(255, 255, 255, 0.72);
+  --glass-bg-dark:   rgba(6, 24, 41, 0.78);
+  --glass-border-light: rgba(255, 255, 255, 0.55);
+  --glass-border-dark:  rgba(0, 196, 214, 0.18);
+  --glass-blur:      blur(20px);
+  --glass-blur-sm:   blur(12px);
+  --glass-shadow:    0 8px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  --glass-shadow-cyan: 0 8px 40px rgba(0, 196, 214, 0.15), inset 0 1px 0 rgba(0, 196, 214, 0.12);
+
+  /* ── Motion tokens ── */
+  --dur-fast:   180ms;
+  --dur-normal: 300ms;
+  --dur-slow:   500ms;
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out:     cubic-bezier(0.0, 0, 0.2, 1);
+
+  /* ── Spacing (8px grid) ── */
+  --sp-1:  8px;
+  --sp-2: 16px;
+  --sp-3: 24px;
+  --sp-4: 32px;
+  --sp-5: 40px;
+  --sp-6: 48px;
+  --sp-8: 64px;
+
+  /* ── Radii ── */
+  --radius:    12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 9999px;
+
+  /* ── Shadows ── */
+  --shadow:       0 4px 20px rgba(4, 15, 30, 0.06), 0 1px 3px rgba(4, 15, 30, 0.04);
+  --shadow-card:  0 2px 12px rgba(4, 15, 30, 0.08);
+  --shadow-hover: 0 16px 40px rgba(4, 15, 30, 0.14);
+  --shadow-cyan:  0 0 0 3px rgba(0, 196, 214, 0.22), 0 8px 32px rgba(0, 196, 214, 0.12);
+
+  /* ── Transitions ── */
+  --transition:  all var(--dur-normal) var(--ease-smooth);
+  --transition-spring: transform var(--dur-normal) var(--ease-spring), box-shadow var(--dur-normal) var(--ease-smooth);
+
+  /* ── Typography ── */
   --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-body:    'Atkinson Hyperlegible Next', system-ui, -apple-system, sans-serif;
   --font-mono:    'Fira Code', 'JetBrains Mono', monospace;
+
+  /* ── Reveal animation delay (set per-element) ── */
+  --reveal-delay: 0ms;
+  --success:   #10B981;
+  --danger:    #D85A30;
 }
 
 html, body {
