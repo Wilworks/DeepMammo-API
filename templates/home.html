@@ -98,9 +98,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(16,185,129,0.12);
-  border: 1px solid rgba(16,185,129,0.25);
-  color: #10B981;
+  background: rgba(0, 196, 214, 0.12) !important;
+  border: 1px solid rgba(0, 196, 214, 0.3) !important;
+  color: var(--cyan) !important;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -108,34 +108,51 @@
   padding: 0.38rem 1rem;
   border-radius: 20px;
   margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-eyebrow::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 196, 214, 0.4), transparent);
+  transform: skewX(-25deg);
+  animation: badge-shimmer 4s infinite linear;
+}
+
+@keyframes badge-shimmer {
+  0% { left: -100%; }
+  30%, 100% { left: 200%; }
 }
 
 .eyebrow-dot {
   width: 7px;
   height: 7px;
-  background: #10B981;
+  background: var(--cyan) !important;
   border-radius: 50%;
   animation: pulse-dot 2s ease-in-out infinite;
   flex-shrink: 0;
 }
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%  { opacity: 0.4; transform: scale(0.75); }
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 196, 214, 0.7); }
+  50%  { opacity: 0.4; transform: scale(0.75); box-shadow: 0 0 8px 2px rgba(0, 196, 214, 0.4); }
 }
 
 /* Hero headline */
 .hero-headline {
   font-family: var(--font-display);
   font-size: clamp(2.1rem, 4.5vw, 3.2rem);
-  font-weight: 800;
+  font-weight: 900 !important;
   line-height: 1.15;
   color: #fff;
   margin-bottom: 1.4rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .hero-headline .gradient-text {
-  background: linear-gradient(90deg, #10B981, #38BDF8);
+  background: linear-gradient(90deg, var(--cyan), var(--sky));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -218,7 +235,9 @@
 .trust-metric {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  border-left: 2px solid rgba(0, 196, 214, 0.25);
+  padding-left: 0.75rem;
 }
 .trust-metric .t-val {
   font-family: var(--font-display);
@@ -230,7 +249,7 @@
 .trust-metric .t-label {
   font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
