@@ -244,19 +244,22 @@
 }
 
 .scan-card-mockup {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 18px;
-  padding: 1.5rem;
-  backdrop-filter: blur(10px);
-  width: 340px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(16,185,129,0.08);
-  animation: float 5s ease-in-out infinite;
+  background: var(--glass-bg-dark) !important;
+  border: 1px solid rgba(0, 196, 214, 0.22) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: 1.5rem !important;
+  backdrop-filter: var(--glass-blur) !important;
+  width: 340px !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 24px 64px rgba(0, 0, 0, 0.5), 
+    0 0 40px rgba(0, 196, 214, 0.18) !important;
+  animation: float 6s ease-in-out infinite !important;
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(0px); filter: drop-shadow(0 5px 15px rgba(0, 196, 214, 0.1)); }
+  50%       { transform: translateY(-12px); filter: drop-shadow(0 20px 25px rgba(0, 196, 214, 0.25)); }
 }
 
 .scan-card-header {
@@ -307,8 +310,9 @@
   position: absolute;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(16,185,129,0.7), transparent);
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--sky), transparent);
+  box-shadow: 0 0 12px var(--cyan);
   animation: scan 3s ease-in-out infinite;
 }
 @keyframes scan {
