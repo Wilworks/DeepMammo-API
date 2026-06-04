@@ -350,6 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
           model: modelSelect ? modelSelect.value : 'deepmammo-v1-resnet'
         });
         showError(data.error || 'Prediction failed.');
+        showToast('Analysis Failed', data.error || 'Prediction pipeline encountered an error.', 'error');
         return;
       }
 
@@ -360,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
         latency: durationSeconds,
         model: modelSelect ? modelSelect.value : 'deepmammo-v1-resnet'
       });
+      showToast('Analysis Complete', 'DeepMammo diagnostic pipeline completed successfully.', 'success');
       renderResults(data);
     } catch (err) {
       const durationSeconds = (performance.now() - startTime) / 1000;
@@ -371,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
         model: modelSelect ? modelSelect.value : 'deepmammo-v1-resnet'
       });
       showError('Network error. Is the server running?');
+      showToast('Network Error', 'Could not establish connection to DeepMammo API.', 'error');
     } finally {
       if (elapsedTimerInterval !== undefined) {
         clearInterval(elapsedTimerInterval);
@@ -817,7 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
       copyBtn.addEventListener('click', () => {
         const fullKey = codeEl.getAttribute('data-full-key') || '';
         navigator.clipboard.writeText(fullKey);
-        alert(`Copied key "${key.name}" to clipboard!`);
+        showToast('Key Copied', `API key "${key.name}" copied to clipboard.`, 'success');
       });
 
       revokeBtn.addEventListener('click', () => {
@@ -825,6 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const freshKeys = getKeys().filter(k => k.id !== key.id);
           saveKeys(freshKeys);
           renderKeys();
+          showToast('Key Revoked', `Credential "${key.name}" successfully revoked.`, 'info');
         }
       });
 
@@ -836,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCreateKey.addEventListener('click', () => {
       const name = newKeyInput.value.trim();
       if (!name) {
-        alert('Please provide a descriptive name for your API key.');
+        showToast('Name Required', 'Please provide a descriptive name for your API key.', 'error');
         return;
       }
       const randomHex = Array.from({ length: 24 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
@@ -853,7 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderKeys();
       updateDocsCodeSnippet();
       newKeyInput.value = '';
-      alert(`API Key "${name}" successfully generated!`);
+      showToast('Key Generated', `API Key "${name}" successfully generated!`, 'success');
     });
   }
 
@@ -936,8 +940,17 @@ fetch("http://127.0.0.1:8000/api/predict/", {
     btnCopyDocsCode.addEventListener('click', () => {
       if (docsCodeBlock) {
         navigator.clipboard.writeText(docsCodeBlock.textContent || '');
-        alert('Copied Code Recipe to clipboard!');
+        showToast('Recipe Copied', 'Code recipe copied to clipboard.', 'success');
       }
+    });
+  }
+
+  const btnCopyJson = document.getElementById('btnCopyJson') as HTMLButtonElement | null;
+  if (btnCopyJson) {
+    btnCopyJson.addEventListener('click', () => {
+      const jsonText = document.getElementById('jsonOutput')?.textContent || '';
+      navigator.clipboard.writeText(jsonText);
+      showToast('Copied JSON', 'API response JSON has been copied to clipboard.', 'success');
     });
   }
 
@@ -976,5 +989,39 @@ fetch("http://127.0.0.1:8000/api/predict/", {
     if (errorBox) {
       errorBox.classList.add('hidden');
     }
+  }
+
+  function showToast(title: string, message: string, type: 'success' | 'error' | 'info' = 'info') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    let iconSvg = '';
+    if (type === 'success') {
+      iconSvg = `<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+    } else if (type === 'error') {
+      iconSvg = `<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--rose-coral)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y2="16"/></svg>`;
+    } else {
+      iconSvg = `<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12" y1="8" y2="8"/></svg>`;
+    }
+
+    toast.innerHTML = `
+      ${iconSvg}
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('toast-fadeout');
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+    }, 4000);
   }
 });
