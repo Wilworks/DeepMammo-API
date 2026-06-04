@@ -233,7 +233,10 @@
     <!-- Loading -->
     <div class="card loading-state hidden" id="loadingState">
       <div class="spinner"></div>
-      <p>Running DeepMammo analysis&hellip;</p>
+      <p style="margin-top: 1.25rem; font-weight: 700; color: var(--text-white);">Running DeepMammo Diagnostic Pipeline</p>
+      <div class="elapsed-timer-wrap mt-1" style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.25rem;">
+        Elapsed Time: <span class="elapsed-timer" id="elapsedTimer" style="font-family: var(--font-mono); font-weight: 700; color: var(--cyan); text-shadow: 0 0 8px var(--cyan-glow);">0.0s</span>
+      </div>
       <div class="loading-steps">
         <div class="loading-step" id="step1"><div class="dot"></div>Preprocessing</div>
         <div class="loading-step" id="step2"><div class="dot"></div>Inference</div>

@@ -274,6 +274,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Run Analysis Pipeline ──────────────────────────────────────────
+  let stepTimeouts: number[] = [];
+  let elapsedTimerInterval: number | undefined;
+
+  function clearLoadingAnimation() {
+    stepTimeouts.forEach(t => clearTimeout(t));
+    stepTimeouts = [];
+    if (elapsedTimerInterval !== undefined) {
+      clearInterval(elapsedTimerInterval);
+      elapsedTimerInterval = undefined;
+    }
+    const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
+    steps.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove('active');
+        const dot = el.querySelector('.dot');
+        if (dot) dot.classList.remove('active');
+      }
+    });
+    const elapsedEl = document.getElementById('elapsedTimer');
+    if (elapsedEl) {
+      elapsedEl.textContent = '0.0s';
+    }
+  }
+
   predictBtn.addEventListener('click', async () => {
     if (!selectedFile) return;
 
@@ -347,6 +372,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       showError('Network error. Is the server running?');
     } finally {
+      if (elapsedTimerInterval !== undefined) {
+        clearInterval(elapsedTimerInterval);
+        elapsedTimerInterval = undefined;
+      }
       loadingEl.classList.add('hidden');
       predictBtn.disabled = false;
     }
@@ -354,10 +383,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Animate Loading Steps ─────────────────────────────────────────
   function animateSteps() {
+    clearLoadingAnimation();
     const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
     const delays = [0, 1200, 2400, 3600, 5000];
     steps.forEach((id, i) => {
-      setTimeout(() => {
+      const t = setTimeout(() => {
         const el = document.getElementById(id);
         if (el) {
           el.classList.add('active');
@@ -365,7 +395,17 @@ document.addEventListener('DOMContentLoaded', () => {
           if (dot) dot.classList.add('active');
         }
       }, delays[i]);
+      stepTimeouts.push(t as any);
     });
+
+    const elapsedEl = document.getElementById('elapsedTimer');
+    const timerStart = performance.now();
+    elapsedTimerInterval = setInterval(() => {
+      const elapsed = (performance.now() - timerStart) / 1000;
+      if (elapsedEl) {
+        elapsedEl.textContent = elapsed.toFixed(1) + 's';
+      }
+    }, 100) as any;
   }
 
   // ── Render Results ────────────────────────────────────────────────
@@ -618,16 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (jsonOutput) {
       jsonOutput.textContent = '{\n  "status": "200 OK",\n  "waiting": "API Request has not been sent yet."\n}';
     }
-
-    const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
-    steps.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.classList.remove('active');
-        const dot = el.querySelector('.dot');
-        if (dot) dot.classList.remove('active');
-      }
-    });
+    clearLoadingAnimation();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
