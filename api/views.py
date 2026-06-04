@@ -29,6 +29,28 @@ class PredictView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request):
+        # Same-Origin protection guard
+        origin = request.META.get('HTTP_ORIGIN')
+        referer = request.META.get('HTTP_REFERER')
+        host = request.get_host()
+
+        if origin:
+            from urllib.parse import urlparse
+            origin_parsed = urlparse(origin)
+            if origin_parsed.netloc != host:
+                return Response(
+                    {'error': 'Access Denied: Cross-Origin API requests are locked. Only same-origin traffic is permitted.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        elif referer:
+            from urllib.parse import urlparse
+            referer_parsed = urlparse(referer)
+            if referer_parsed.netloc != host:
+                return Response(
+                    {'error': 'Access Denied: Cross-Origin Referer detected. Only same-origin traffic is permitted.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
         # Pre-flight content length guard
         content_length = request.META.get('CONTENT_LENGTH')
         if content_length:
