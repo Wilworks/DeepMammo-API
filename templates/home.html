@@ -519,28 +519,28 @@
 
 .step-cell {
   position: relative;
-  padding: 2rem 1.5rem;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  padding: 2.25rem 1.5rem;
+  background: var(--white) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
   margin: 0 0.5rem;
-  transition: all 0.25s ease;
+  transition: var(--transition-spring) !important;
   cursor: default;
 }
 .step-cell:first-child { margin-left: 0; }
 .step-cell:last-child  { margin-right: 0; }
 
 .step-cell:hover {
-  transform: translateY(-4px);
-  border-color: rgba(16,185,129,0.4);
-  box-shadow: 0 8px 28px rgba(16,185,129,0.10), 0 0 0 1px rgba(16,185,129,0.15);
+  transform: translateY(-6px) !important;
+  border-color: rgba(0, 196, 214, 0.3) !important;
+  box-shadow: 0 12px 30px rgba(0, 196, 214, 0.08), var(--shadow-cyan) !important;
 }
 
 .step-badge {
-  width: 42px;
-  height: 42px;
-  background: linear-gradient(135deg, #082F49, #0d3d5e);
-  color: #fff;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--brand-navy) 0%, var(--surface-2) 100%) !important;
+  color: var(--text-white) !important;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -548,12 +548,14 @@
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 800;
-  margin-bottom: 1.1rem;
-  box-shadow: 0 4px 12px rgba(8,47,73,0.25);
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 12px rgba(8,47,73,0.15);
+  transition: var(--transition) !important;
 }
 .step-cell:hover .step-badge {
-  background: linear-gradient(135deg, #10B981, #059669);
-  box-shadow: 0 4px 16px rgba(16,185,129,0.35);
+  background: linear-gradient(135deg, var(--cyan) 0%, var(--sky) 100%) !important;
+  box-shadow: 0 0 15px var(--cyan-glow), 0 4px 12px rgba(0, 196, 214, 0.25) !important;
+  color: var(--text-dark) !important;
 }
 
 .step-name {
@@ -578,14 +580,23 @@
   z-index: 10;
   width: 28px;
   height: 28px;
-  background: var(--bg);
+  background: var(--white);
   border: 1px solid var(--border);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-light);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  box-shadow: var(--shadow);
+  transition: var(--transition-spring) !important;
+}
+.step-cell:hover .step-arrow {
+  transform: translateY(-50%) translateX(4px) scale(1.1) !important;
+  color: var(--cyan);
+  border-color: rgba(0, 196, 214, 0.35);
+  box-shadow: var(--shadow-cyan);
 }
 
 /* ── Model Bento (dark section) ───────────────────────────────────── */
