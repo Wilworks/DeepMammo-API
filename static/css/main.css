@@ -208,6 +208,36 @@ a:hover { color: var(--purple-dark); }
 /* ── Main content ─────────────────────────────────────────────────── */
 main { flex: 1; }
 
+/* ── Scroll-Reveal System ─────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  animation: none;
+}
+.reveal.revealed {
+  animation: revealUp var(--dur-slow) var(--ease-spring) forwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+.reveal--left { transform: translateX(-28px); }
+.reveal--left.revealed { animation-name: revealLeft; }
+.reveal--right { transform: translateX(28px); }
+.reveal--right.revealed { animation-name: revealRight; }
+.reveal--scale { transform: scale(0.94); }
+.reveal--scale.revealed { animation-name: revealScale; }
+
+@keyframes revealUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes revealLeft {
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes revealRight {
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes revealScale {
+  to { opacity: 1; transform: scale(1); }
+}
+
 /* ── Buttons ──────────────────────────────────────────────────────── */
 .btn {
   display: inline-flex !important;
