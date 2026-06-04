@@ -305,12 +305,57 @@ main { flex: 1; }
   background: var(--white) !important;
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
-  box-shadow: var(--shadow) !important;
+  box-shadow: var(--shadow-card) !important;
   padding: 1.5rem !important;
-  transition: var(--transition) !important;
+  transition: transform var(--dur-normal) var(--ease-spring),
+              box-shadow var(--dur-normal) var(--ease-smooth) !important;
 }
 .card:hover {
-  box-shadow: 0 8px 30px rgba(10, 22, 40, 0.08) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: var(--shadow-hover), 0 0 0 1px rgba(0, 196, 214, 0.10) !important;
+}
+
+/* Glass card — dark (for use on navy backgrounds) */
+.glass-card-dark {
+  background: var(--glass-bg-dark) !important;
+  border: 1px solid var(--glass-border-dark) !important;
+  border-radius: var(--radius-lg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  box-shadow: var(--glass-shadow) !important;
+  transition: var(--transition-spring) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+.glass-card-dark::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 196, 214, 0.4), transparent);
+  opacity: 0;
+  transition: opacity var(--dur-normal) var(--ease-smooth);
+}
+.glass-card-dark:hover {
+  border-color: rgba(0, 196, 214, 0.30) !important;
+  box-shadow: var(--glass-shadow-cyan) !important;
+  transform: translateY(-4px) !important;
+}
+.glass-card-dark:hover::before { opacity: 1; }
+
+/* Glass card — light (for use on white/light backgrounds) */
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.78) !important;
+  border: 1px solid rgba(221, 232, 245, 0.9) !important;
+  border-radius: var(--radius-lg) !important;
+  backdrop-filter: var(--glass-blur-sm) !important;
+  -webkit-backdrop-filter: var(--glass-blur-sm) !important;
+  box-shadow: 0 4px 24px rgba(4, 15, 30, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  transition: var(--transition-spring) !important;
+}
+.glass-card-light:hover {
+  box-shadow: 0 12px 36px rgba(0, 196, 214, 0.12), 0 0 0 1px rgba(0, 196, 214, 0.15) !important;
+  transform: translateY(-3px) !important;
 }
 
 /* ── Custom Form Inputs ────────────────────────────────────────────── */
