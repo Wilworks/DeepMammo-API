@@ -443,7 +443,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (abnConfEl) abnConfEl.textContent = pct(abn.confidence);
 
     const abnBar = document.getElementById('abnBar');
-    if (abnBar) abnBar.style.width = pct(abn.confidence);
+    if (abnBar) {
+      abnBar.className = 'confidence-bar-fill';
+      if (abn.label.toLowerCase() === 'mass') {
+        abnBar.classList.add('bar-mass');
+      } else if (abn.label.toLowerCase() === 'calcification') {
+        abnBar.classList.add('bar-calcification');
+      }
+      abnBar.style.width = '0%';
+      setTimeout(() => {
+        abnBar.style.width = pct(abn.confidence);
+      }, 50);
+    }
 
     const probMass = document.getElementById('probMass');
     if (probMass) probMass.textContent = pct(abn.probabilities.mass);
@@ -457,7 +468,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pathConfEl) pathConfEl.textContent = pct(path.confidence);
 
     const pathBar = document.getElementById('pathBar');
-    if (pathBar) pathBar.style.width = pct(path.confidence);
+    if (pathBar) {
+      pathBar.className = 'confidence-bar-fill';
+      if (path.label.toLowerCase() === 'benign') {
+        pathBar.classList.add('bar-benign');
+      } else if (path.label.toLowerCase() === 'malignant') {
+        pathBar.classList.add('bar-malignant');
+      }
+      pathBar.style.width = '0%';
+      setTimeout(() => {
+        pathBar.style.width = pct(path.confidence);
+      }, 50);
+    }
 
     const probBenign = document.getElementById('probBenign');
     if (probBenign) probBenign.textContent = pct(path.probabilities.benign);
@@ -687,6 +709,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (pathCard) {
       pathCard.classList.remove('glow-benign', 'glow-malignant');
+    }
+    const abnBarFill = document.getElementById('abnBar') as HTMLDivElement | null;
+    const pathBarFill = document.getElementById('pathBar') as HTMLDivElement | null;
+    if (abnBarFill) {
+      abnBarFill.className = 'confidence-bar-fill';
+      abnBarFill.style.width = '0%';
+    }
+    if (pathBarFill) {
+      pathBarFill.className = 'confidence-bar-fill';
+      pathBarFill.style.width = '0%';
     }
     clearLoadingAnimation();
     window.scrollTo({ top: 0, behavior: 'smooth' });
